@@ -22,9 +22,11 @@ interface DiaryState {
 }
 
 function getAuth() {
-  const { user, profile, viewMode } = useAuthStore.getState()
-  const userId = user?.id ?? ''
-  const viewAll = profile?.role === 'admin' && viewMode === 'admin'
+  const { user, profile, viewMode, viewAsUserId } = useAuthStore.getState()
+  const myUserId = user?.id ?? ''
+  const isAdmin = profile?.role === 'admin'
+  const viewAll = isAdmin && viewMode === 'admin' && !viewAsUserId
+  const userId = isAdmin && viewAsUserId ? viewAsUserId : myUserId
   return { userId, viewAll }
 }
 
