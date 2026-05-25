@@ -44,22 +44,21 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   authLoading: true,
 
   init: async () => {
-    supabase.auth.onAuthStateChange(async (event, session) => {
-      console.log('[auth] event:', event, 'session.user.id:', session?.user?.id)
+    // KNOWN ISSUE: making supabase requests synchronously inside an
+    // onAuthStateChange callback deadlocks on the internal auth lock.
+    // Defer with setTimeout(0) so the lock releases before our queries run.
+    // ref: https://github.com/supabase/auth-js/issues/762
+    supabase.auth.onAuthStateChange((event, session) => {
+      console.log('[auth] event:', event, 'user:', session?.user?.id)
       if (session?.user) {
-        // DEBUG: ask DB what auth.uid() actually sees — never block on this
-        try {
-          const { data: who, error: whoErr } = await supabase.rpc('whoami')
-          console.log('[auth] whoami →', who, 'err:', whoErr)
-        } catch (e) {
-          console.log('[auth] whoami threw:', e)
-        }
-
-        const profile = await fetchProfile(session.user.id)
-        set({ user: session.user, profile, authLoading: false })
-        if (profile?.role === 'admin') {
-          get().fetchAllProfiles()
-        }
+        const user = session.user
+        setTimeout(async () => {
+          const profile = await fetchProfile(user.id)
+          set({ user, profile, authLoading: false })
+          if (profile?.role === 'admin') {
+            get().fetchAllProfiles()
+          }
+        }, 0)
       } else {
         set({ user: null, profile: null, authLoading: false, viewMode: 'personal', viewAsUserId: null, allProfiles: [] })
       }
