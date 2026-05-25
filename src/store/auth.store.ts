@@ -44,20 +44,42 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   authLoading: true,
 
   init: async () => {
-    // KNOWN ISSUE: making supabase requests synchronously inside an
-    // onAuthStateChange callback deadlocks on the internal auth lock.
-    // Defer with setTimeout(0) so the lock releases before our queries run.
+    console.log('[auth] init called — build v4')
+
+    // Safety: never leave user stuck on the spinner forever, no matter what
+    setTimeout(() => {
+      if (get().authLoading) {
+        console.warn('[auth] SAFETY TIMEOUT — forcing authLoading=false after 5s')
+        set({ authLoading: false })
+      }
+    }, 5000)
+
+    // Avoid Supabase auth-lock deadlock by deferring queries with setTimeout(0).
     // ref: https://github.com/supabase/auth-js/issues/762
     supabase.auth.onAuthStateChange((event, session) => {
-      console.log('[auth] event:', event, 'user:', session?.user?.id)
+      console.log('[auth] event:', event, 'uid:', session?.user?.id)
       if (session?.user) {
         const user = session.user
         setTimeout(async () => {
-          const profile = await fetchProfile(user.id)
-          set({ user, profile, authLoading: false })
-          if (profile?.role === 'admin') {
-            get().fetchAllProfiles()
+          // DIAGNOSTIC: confirm what the DB sees as auth.uid() for this request
+          try {
+            const { data: who, error: whoErr } = await supabase.rpc('whoami')
+            console.log('[auth] whoami →', JSON.stringify(who), 'err:', whoErr?.message ?? null)
+          } catch (e) {
+            console.log('[auth] whoami threw:', e)
           }
+
+          console.log('[auth] deferred fetchProfile starting')
+          fetchProfile(user.id)
+            .then((profile) => {
+              console.log('[auth] profile loaded:', profile?.name, 'role:', profile?.role)
+              set({ user, profile, authLoading: false })
+              if (profile?.role === 'admin') get().fetchAllProfiles()
+            })
+            .catch((err) => {
+              console.error('[auth] profile fetch threw:', err)
+              set({ user, profile: null, authLoading: false })
+            })
         }, 0)
       } else {
         set({ user: null, profile: null, authLoading: false, viewMode: 'personal', viewAsUserId: null, allProfiles: [] })
