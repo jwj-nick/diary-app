@@ -44,10 +44,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
   authLoading: true,
 
   init: async () => {
-    // onAuthStateChange fires INITIAL_SESSION after client is fully ready
-    // → JWT is properly set on all subsequent requests (no timing issue)
-    supabase.auth.onAuthStateChange(async (_event, session) => {
+    supabase.auth.onAuthStateChange(async (event, session) => {
+      console.log('[auth] event:', event, 'session.user.id:', session?.user?.id)
       if (session?.user) {
+        // DEBUG: ask DB what auth.uid() actually sees
+        const { data: who, error: whoErr } = await supabase.rpc('whoami')
+        console.log('[auth] whoami →', who, 'err:', whoErr)
+
         const profile = await fetchProfile(session.user.id)
         set({ user: session.user, profile, authLoading: false })
         if (profile?.role === 'admin') {
