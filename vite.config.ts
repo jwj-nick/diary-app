@@ -5,7 +5,7 @@ import { VitePWA } from 'vite-plugin-pwa'
 import { resolve } from 'path'
 
 export default defineConfig({
-  base: '/diary-app/',
+  base: '/',
   plugins: [
     tailwindcss(),
     react(),
@@ -19,8 +19,8 @@ export default defineConfig({
         background_color: '#fafafa',
         display: 'standalone',
         icons: [
-          { src: '/diary-app/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: '/diary-app/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: '/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: '/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
         ],
       },
     }),
