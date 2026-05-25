@@ -1,4 +1,4 @@
-export type EntryType = 'study' | 'reading' | 'free' | 'goal' | 'exam'
+export type EntryType = 'study' | 'reading' | 'free' | 'goal' | 'exam' | 'schedule' | 'todo'
 export type Understanding = 1 | 2 | 3 | 4
 export type ExamKind = 'midterm' | 'final' | 'performance' | 'quiz' | 'other'
 export type GoalStatus = 'in_progress' | 'completed'
@@ -6,7 +6,7 @@ export type GoalStatus = 'in_progress' | 'completed'
 export interface BaseEntry {
   id: string
   type: EntryType
-  date: string          // YYYY-MM-DD (for goals/exams: creation date)
+  date: string
   createdAt: string
   updatedAt: string
   deletedAt?: string
@@ -51,7 +51,7 @@ export interface StudyGoalEntry extends BaseEntry {
   type: 'goal'
   title: string
   subject?: string
-  targetDate: string             // YYYY-MM-DD, 목표 달성일
+  targetDate: string
   description?: string
   steps: GoalStep[]
   status: GoalStatus
@@ -61,7 +61,7 @@ export interface StudyGoalEntry extends BaseEntry {
 export interface PrepStep {
   id: string
   text: string
-  dueDate?: string               // YYYY-MM-DD (선택)
+  dueDate?: string
   done: boolean
   doneAt?: string
 }
@@ -70,10 +70,37 @@ export interface ExamEntry extends BaseEntry {
   type: 'exam'
   title: string
   subject: string
-  examDate: string               // YYYY-MM-DD, 시험일
+  examDate: string
   examKind: ExamKind
-  scope?: string                 // 시험 범위
+  scope?: string
   prepSteps: PrepStep[]
+}
+
+export interface ScheduleEntry extends BaseEntry {
+  type: 'schedule'
+  title: string
+  startDate: string
+  startTime?: string
+  endDate?: string
+  endTime?: string
+  location?: string
+  note?: string
+  allDay?: boolean
+}
+
+export interface TodoItem {
+  id: string
+  text: string
+  done: boolean
+  doneAt?: string
+}
+
+export interface TodoEntry extends BaseEntry {
+  type: 'todo'
+  title: string
+  dueDate?: string
+  items: TodoItem[]
+  completedAt?: string
 }
 
 export type DiaryEntry =
@@ -82,20 +109,20 @@ export type DiaryEntry =
   | FreeDiaryEntry
   | StudyGoalEntry
   | ExamEntry
+  | ScheduleEntry
+  | TodoEntry
 
-// 캘린더 표시용: entry가 캘린더의 어떤 날짜에 표시되어야 하는지
 export function getEntryDisplayDate(entry: DiaryEntry): string {
   if (entry.type === 'goal') return entry.targetDate
   if (entry.type === 'exam') return entry.examDate
+  if (entry.type === 'schedule') return entry.startDate
   return entry.date
 }
 
-// 정렬용 primary date
 export function getEntryPrimaryDate(entry: DiaryEntry): string {
   return getEntryDisplayDate(entry)
 }
 
-// 표시용 짧은 타이틀
 export function getEntryShortTitle(entry: DiaryEntry): string {
   switch (entry.type) {
     case 'study': return `${entry.subject} · ${entry.topic}`
@@ -103,5 +130,7 @@ export function getEntryShortTitle(entry: DiaryEntry): string {
     case 'free': return entry.title || '자유 일기'
     case 'goal': return entry.title
     case 'exam': return entry.title
+    case 'schedule': return entry.title
+    case 'todo': return entry.title
   }
 }

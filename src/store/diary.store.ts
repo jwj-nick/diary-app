@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { DiaryEntry, EntryType } from '@/types/diary'
 import { getAllEntries, saveEntry, deleteEntry } from '@/lib/storage'
+import { useAuthStore } from './auth.store'
 
 type FilterType = EntryType | 'all' | 'trash' | 'planning'
 
@@ -20,6 +21,13 @@ interface DiaryState {
   setSearchQuery: (q: string) => void
 }
 
+function getAuth() {
+  const { user, profile, viewMode } = useAuthStore.getState()
+  const userId = user?.id ?? ''
+  const viewAll = profile?.role === 'admin' && viewMode === 'admin'
+  return { userId, viewAll }
+}
+
 export const useDiaryStore = create<DiaryState>((set, get) => ({
   entries: [],
   loading: false,
@@ -27,18 +35,24 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
   searchQuery: '',
 
   loadEntries: async () => {
+    const { userId, viewAll } = getAuth()
+    if (!userId) return
     set({ loading: true })
-    const entries = await getAllEntries()
+    const entries = await getAllEntries(userId, viewAll)
     set({ entries, loading: false })
   },
 
   addEntry: async (entry: DiaryEntry) => {
-    await saveEntry(entry)
-    set((state) => ({ entries: [...state.entries, entry] }))
+    const { userId } = getAuth()
+    if (!userId) return
+    await saveEntry(entry, userId)
+    set((state) => ({ entries: [entry, ...state.entries] }))
   },
 
   updateEntry: async (entry: DiaryEntry) => {
-    await saveEntry(entry)
+    const { userId } = getAuth()
+    if (!userId) return
+    await saveEntry(entry, userId)
     set((state) => ({
       entries: state.entries.map((e) => (e.id === entry.id ? entry : e)),
     }))
@@ -47,8 +61,10 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
   softDelete: async (id: string) => {
     const entry = get().entries.find((e) => e.id === id)
     if (!entry) return
+    const { userId } = getAuth()
+    if (!userId) return
     const updated: DiaryEntry = { ...entry, deletedAt: new Date().toISOString() }
-    await saveEntry(updated)
+    await saveEntry(updated, userId)
     set((state) => ({
       entries: state.entries.map((e) => (e.id === id ? updated : e)),
     }))
@@ -57,9 +73,11 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
   restore: async (id: string) => {
     const entry = get().entries.find((e) => e.id === id)
     if (!entry) return
+    const { userId } = getAuth()
+    if (!userId) return
     const updated: DiaryEntry = { ...entry }
     delete updated.deletedAt
-    await saveEntry(updated)
+    await saveEntry(updated, userId)
     set((state) => ({
       entries: state.entries.map((e) => (e.id === id ? updated : e)),
     }))
@@ -75,8 +93,9 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
   toggleStep: async (entryId: string, stepId: string) => {
     const entry = get().entries.find((e) => e.id === entryId)
     if (!entry) return
+    const { userId } = getAuth()
+    if (!userId) return
     const now = new Date().toISOString()
-
     let updated: DiaryEntry | null = null
 
     if (entry.type === 'goal') {
@@ -85,8 +104,7 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
       )
       const allDone = steps.length > 0 && steps.every((s) => s.done)
       updated = {
-        ...entry,
-        steps,
+        ...entry, steps,
         status: allDone ? 'completed' : 'in_progress',
         completedAt: allDone ? now : undefined,
         updatedAt: now,
@@ -96,10 +114,20 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
         s.id === stepId ? { ...s, done: !s.done, doneAt: !s.done ? now : undefined } : s
       )
       updated = { ...entry, prepSteps, updatedAt: now }
+    } else if (entry.type === 'todo') {
+      const items = entry.items.map((item) =>
+        item.id === stepId ? { ...item, done: !item.done, doneAt: !item.done ? now : undefined } : item
+      )
+      const allDone = items.length > 0 && items.every((i) => i.done)
+      updated = {
+        ...entry, items,
+        completedAt: allDone ? now : undefined,
+        updatedAt: now,
+      }
     }
 
     if (!updated) return
-    await saveEntry(updated)
+    await saveEntry(updated, userId)
     const finalUpdated = updated
     set((state) => ({
       entries: state.entries.map((e) => (e.id === entryId ? finalUpdated : e)),

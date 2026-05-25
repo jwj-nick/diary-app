@@ -25,6 +25,8 @@ const TYPE_DOT: Record<EntryType, string> = {
   free: 'bg-amber-500',
   goal: 'bg-violet-500',
   exam: 'bg-rose-500',
+  schedule: 'bg-sky-500',
+  todo: 'bg-orange-500',
 }
 
 const TYPE_BG: Record<EntryType, string> = {
@@ -33,6 +35,8 @@ const TYPE_BG: Record<EntryType, string> = {
   free: 'bg-amber-50 text-amber-700 border-amber-100',
   goal: 'bg-violet-50 text-violet-700 border-violet-100',
   exam: 'bg-rose-100 text-rose-700 border-rose-200 font-medium',
+  schedule: 'bg-sky-50 text-sky-700 border-sky-100',
+  todo: 'bg-orange-50 text-orange-700 border-orange-100',
 }
 
 const TYPE_EMOJI: Record<EntryType, string> = {
@@ -41,6 +45,8 @@ const TYPE_EMOJI: Record<EntryType, string> = {
   free: '✏️',
   goal: '🎯',
   exam: '📝',
+  schedule: '📅',
+  todo: '☑️',
 }
 
 interface Props {
@@ -194,7 +200,7 @@ function DayCell({
 }: DayCellProps) {
   // Sort entries: exam > goal > others
   const sorted = useMemo(() => {
-    const priority: Record<EntryType, number> = { exam: 0, goal: 1, study: 2, reading: 3, free: 4 }
+    const priority: Record<EntryType, number> = { exam: 0, goal: 1, schedule: 2, todo: 3, study: 4, reading: 5, free: 6 }
     return [...entries].sort((a, b) => priority[a.type] - priority[b.type])
   }, [entries])
 

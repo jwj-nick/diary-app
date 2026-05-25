@@ -1,8 +1,9 @@
 import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, differenceInCalendarDays } from 'date-fns'
-import { Trash2, RotateCcw, X, Target, FileText } from 'lucide-react'
+import { Trash2, RotateCcw, X, Target, FileText, CalendarClock, CheckSquare } from 'lucide-react'
 import { useDiaryStore } from '@/store/diary.store'
+import { useAuthStore } from '@/store/auth.store'
 import type { DiaryEntry, EntryType } from '@/types/diary'
 import { getEntryShortTitle } from '@/types/diary'
 import { cn } from '@/lib/utils'
@@ -13,6 +14,8 @@ const TYPE_LABEL: Record<EntryType, string> = {
   free: '자유',
   goal: '목표',
   exam: '시험',
+  schedule: '일정',
+  todo: '할일',
 }
 
 const TYPE_BADGE: Record<EntryType, string> = {
@@ -21,6 +24,8 @@ const TYPE_BADGE: Record<EntryType, string> = {
   free: 'bg-amber-100 text-amber-700',
   goal: 'bg-violet-100 text-violet-700',
   exam: 'bg-rose-100 text-rose-700',
+  schedule: 'bg-sky-100 text-sky-700',
+  todo: 'bg-orange-100 text-orange-700',
 }
 
 function TypeBadge({ type }: { type: EntryType }) {
@@ -46,6 +51,10 @@ function EntryCard({ entry, isTrash }: { entry: DiaryEntry; isTrash: boolean }) 
                 ? `목표 ~${format(new Date(entry.targetDate), 'M/d')}`
                 : entry.type === 'exam'
                 ? `시험 ${format(new Date(entry.examDate), 'M/d')}`
+                : entry.type === 'schedule'
+                ? format(new Date(entry.startDate), 'M/d (EEE)')
+                : entry.type === 'todo' && entry.dueDate
+                ? `기한 ${format(new Date(entry.dueDate), 'M/d')}`
                 : format(new Date(entry.date), 'yyyy년 M월 d일')}
             </span>
             {entry.type === 'study' && (
@@ -61,6 +70,8 @@ function EntryCard({ entry, isTrash }: { entry: DiaryEntry; isTrash: boolean }) 
           <h3 className="font-medium text-zinc-900 text-sm truncate mb-1">
             {entry.type === 'goal' && <Target className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-violet-500" />}
             {entry.type === 'exam' && <FileText className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-rose-500" />}
+            {entry.type === 'schedule' && <CalendarClock className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-sky-500" />}
+            {entry.type === 'todo' && <CheckSquare className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-orange-500" />}
             {title}
           </h3>
 
@@ -75,6 +86,42 @@ function EntryCard({ entry, isTrash }: { entry: DiaryEntry; isTrash: boolean }) 
             <p className="text-xs text-zinc-500 line-clamp-2 whitespace-pre-wrap">
               {entry.body.slice(0, 200)}
             </p>
+          )}
+          {entry.type === 'schedule' && (
+            <div className="text-xs text-zinc-500 space-y-0.5 mt-1">
+              {!entry.allDay && entry.startTime && (
+                <p>🕐 {entry.startTime}{entry.endTime ? ` ~ ${entry.endTime}` : ''}</p>
+              )}
+              {entry.location && <p>📍 {entry.location}</p>}
+              {entry.note && <p className="line-clamp-1">{entry.note}</p>}
+            </div>
+          )}
+          {entry.type === 'todo' && entry.items.length > 0 && (
+            <div className="mt-2 space-y-1">
+              <ProgressBar
+                done={entry.items.filter((i) => i.done).length}
+                total={entry.items.length}
+                color="orange"
+              />
+              <ul className="space-y-0.5 mt-1">
+                {entry.items.slice(0, 3).map((item) => (
+                  <li key={item.id}>
+                    <label className="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={item.done}
+                        onChange={() => toggleStep(entry.id, item.id)}
+                        className="rounded text-orange-500 focus:ring-orange-400"
+                      />
+                      <span className={cn(item.done && 'line-through text-zinc-400')}>{item.text}</span>
+                    </label>
+                  </li>
+                ))}
+                {entry.items.length > 3 && (
+                  <p className="text-xs text-zinc-400 pl-5">+{entry.items.length - 3}개 더</p>
+                )}
+              </ul>
+            </div>
           )}
           {entry.type === 'goal' && (
             <div className="mt-2 space-y-1.5">
@@ -182,19 +229,15 @@ function CountdownBadge({ date }: { date: string }) {
   return <span className="text-xs text-zinc-500">D-{days}</span>
 }
 
-function ProgressBar({ done, total, color }: { done: number; total: number; color: 'violet' | 'rose' }) {
+function ProgressBar({ done, total, color }: { done: number; total: number; color: 'violet' | 'rose' | 'orange' }) {
   const pct = total > 0 ? (done / total) * 100 : 0
+  const barColor = color === 'violet' ? 'bg-violet-500' : color === 'rose' ? 'bg-rose-500' : 'bg-orange-500'
   return (
     <div className="flex items-center gap-2 text-xs text-zinc-500">
       <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-        <div
-          className={cn('h-full', color === 'violet' ? 'bg-violet-500' : 'bg-rose-500')}
-          style={{ width: `${pct}%` }}
-        />
+        <div className={cn('h-full', barColor)} style={{ width: `${pct}%` }} />
       </div>
-      <span>
-        {done}/{total}
-      </span>
+      <span>{done}/{total}</span>
     </div>
   )
 }
@@ -202,10 +245,11 @@ function ProgressBar({ done, total, color }: { done: number; total: number; colo
 export function HomePage() {
   const navigate = useNavigate()
   const { entries, loading, filterType, searchQuery, loadEntries, setSearchQuery } = useDiaryStore()
+  const { viewMode } = useAuthStore()
 
   useEffect(() => {
     loadEntries()
-  }, [loadEntries])
+  }, [loadEntries, viewMode])
 
   const displayed = useMemo(() => {
     const isTrash = filterType === 'trash'
@@ -228,6 +272,8 @@ export function HomePage() {
         if (e.type === 'free') return `${e.title ?? ''} ${e.body}`.toLowerCase().includes(q)
         if (e.type === 'goal') return `${e.title} ${e.description ?? ''}`.toLowerCase().includes(q)
         if (e.type === 'exam') return `${e.title} ${e.subject} ${e.scope ?? ''}`.toLowerCase().includes(q)
+        if (e.type === 'schedule') return `${e.title} ${e.location ?? ''} ${e.note ?? ''}`.toLowerCase().includes(q)
+        if (e.type === 'todo') return `${e.title} ${e.items.map((i) => i.text).join(' ')}`.toLowerCase().includes(q)
         return false
       })
     }
@@ -249,22 +295,12 @@ export function HomePage() {
 
   const isTrash = filterType === 'trash'
 
-  const pageTitle =
-    filterType === 'all'
-      ? '모든 일기'
-      : filterType === 'study'
-      ? '공부 일기'
-      : filterType === 'reading'
-      ? '독서 일기'
-      : filterType === 'free'
-      ? '자유 일기'
-      : filterType === 'goal'
-      ? '공부 목표'
-      : filterType === 'exam'
-      ? '시험 / 수행평가'
-      : filterType === 'planning'
-      ? '목표 & 시험'
-      : '삭제됨'
+  const PAGE_TITLE: Record<string, string> = {
+    all: '모든 항목', study: '공부 일기', reading: '독서 일기', free: '자유 일기',
+    goal: '목표', exam: '시험 / 수행평가', schedule: '일정 / 약속', todo: '할일',
+    planning: '목표 & 시험', trash: '삭제됨',
+  }
+  const pageTitle = PAGE_TITLE[filterType] ?? '모든 항목'
 
   if (loading) {
     return (

@@ -4,6 +4,7 @@ import { format, isSameDay, differenceInCalendarDays } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { Plus, Trash2 } from 'lucide-react'
 import { useDiaryStore } from '@/store/diary.store'
+import { useAuthStore } from '@/store/auth.store'
 import type { DiaryEntry, EntryType } from '@/types/diary'
 import { getEntryDisplayDate, getEntryShortTitle } from '@/types/diary'
 import { MonthCalendar } from '@/components/shared/MonthCalendar'
@@ -15,6 +16,8 @@ const TYPE_LABEL: Record<EntryType, string> = {
   free: '자유',
   goal: '목표',
   exam: '시험',
+  schedule: '일정',
+  todo: '할일',
 }
 
 const TYPE_DOT: Record<EntryType, string> = {
@@ -23,17 +26,20 @@ const TYPE_DOT: Record<EntryType, string> = {
   free: 'bg-amber-500',
   goal: 'bg-violet-500',
   exam: 'bg-rose-500',
+  schedule: 'bg-sky-500',
+  todo: 'bg-orange-500',
 }
 
 export function CalendarPage() {
   const navigate = useNavigate()
   const { entries, loadEntries, softDelete, toggleStep } = useDiaryStore()
+  const { viewMode } = useAuthStore()
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
 
   useEffect(() => {
     loadEntries()
-  }, [loadEntries])
+  }, [loadEntries, viewMode])
 
   const activeEntries = useMemo(() => entries.filter((e) => !e.deletedAt), [entries])
 
@@ -49,7 +55,7 @@ export function CalendarPage() {
     <div className="h-full flex flex-col gap-4 max-w-6xl mx-auto">
       {/* Legend */}
       <div className="flex items-center flex-wrap gap-3 text-xs text-zinc-500">
-        {(['study', 'reading', 'free', 'goal', 'exam'] as EntryType[]).map((t) => (
+        {(['study', 'reading', 'free', 'goal', 'exam', 'schedule', 'todo'] as EntryType[]).map((t) => (
           <span key={t} className="flex items-center gap-1">
             <span className={cn('w-2 h-2 rounded-full inline-block', TYPE_DOT[t])} />
             {TYPE_LABEL[t]}
