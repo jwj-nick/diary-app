@@ -47,9 +47,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     supabase.auth.onAuthStateChange(async (event, session) => {
       console.log('[auth] event:', event, 'session.user.id:', session?.user?.id)
       if (session?.user) {
-        // DEBUG: ask DB what auth.uid() actually sees
-        const { data: who, error: whoErr } = await supabase.rpc('whoami')
-        console.log('[auth] whoami →', who, 'err:', whoErr)
+        // DEBUG: ask DB what auth.uid() actually sees — never block on this
+        try {
+          const { data: who, error: whoErr } = await supabase.rpc('whoami')
+          console.log('[auth] whoami →', who, 'err:', whoErr)
+        } catch (e) {
+          console.log('[auth] whoami threw:', e)
+        }
 
         const profile = await fetchProfile(session.user.id)
         set({ user: session.user, profile, authLoading: false })
