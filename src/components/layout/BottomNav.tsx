@@ -10,7 +10,7 @@ export function BottomNav() {
   const isAdmin = profile?.role === 'admin'
 
   const items = [
-    { path: '/', icon: Home, label: '홈' },
+    { path: '/home', icon: Home, label: '홈' },
     { path: '/write', icon: PenLine, label: '쓰기' },
     { path: '/calendar', icon: Calendar, label: '캘린더' },
     { path: '/profile', icon: User, label: '내 정보' },

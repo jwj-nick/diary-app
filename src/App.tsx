@@ -36,12 +36,13 @@ function PrivateRoutes() {
     <AppShell>
       <Suspense fallback={<PageLoading />}>
         <Routes>
-          <Route path="/" element={<HomePage />} />
+          <Route path="/" element={<Navigate to="/calendar" replace />} />
+          <Route path="/home" element={<HomePage />} />
           <Route path="/write" element={<WritePage />} />
           <Route path="/calendar" element={<CalendarPage />} />
           <Route path="/profile" element={<ProfilePage />} />
           <Route path="/admin" element={<AdminPage />} />
-          <Route path="*" element={<Navigate to="/" replace />} />
+          <Route path="*" element={<Navigate to="/calendar" replace />} />
         </Routes>
       </Suspense>
     </AppShell>
@@ -66,7 +67,7 @@ function App() {
 function LoginPublic() {
   const { user, authLoading } = useAuthStore()
   if (authLoading) return <AuthLoading />
-  if (user) return <Navigate to="/" replace />
+  if (user) return <Navigate to="/calendar" replace />
   return <LoginPage />
 }
 

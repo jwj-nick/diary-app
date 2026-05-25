@@ -59,7 +59,7 @@ export function Sidebar({ onClose }: Props) {
 
   const handleFilterClick = (type: typeof filterType) => {
     setFilterType(type)
-    navigate('/')
+    navigate('/home')
     onClose?.()
   }
 
@@ -206,7 +206,7 @@ export function Sidebar({ onClose }: Props) {
               {recentEntries.map((entry: DiaryEntry) => (
                 <button
                   key={entry.id}
-                  onClick={() => handleNavClick('/')}
+                  onClick={() => handleNavClick('/home')}
                   className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm hover:bg-zinc-50 text-left"
                 >
                   <TypeDot type={entry.type} />
