@@ -19,10 +19,12 @@ const EXAM_KINDS: { value: ExamKind; label: string }[] = [
 interface Props {
   onSuccess: () => void
   onCancel: () => void
+  entry?: ExamEntry
 }
 
-export function ExamForm({ onSuccess, onCancel }: Props) {
-  const addEntry = useDiaryStore((s) => s.addEntry)
+export function ExamForm({ onSuccess, onCancel, entry }: Props) {
+  const { addEntry, updateEntry } = useDiaryStore()
+  const isEdit = !!entry
 
   const {
     register,
@@ -31,40 +33,75 @@ export function ExamForm({ onSuccess, onCancel }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<ExamFormData>({
     resolver: zodResolver(examSchema),
-    defaultValues: {
-      examDate: format(addDays(new Date(), 14), 'yyyy-MM-dd'),
-      examKind: 'performance',
-      prepSteps: [{ text: '', dueDate: '' }, { text: '', dueDate: '' }],
-    },
+    defaultValues: entry
+      ? {
+          title: entry.title,
+          subject: entry.subject,
+          examDate: entry.examDate,
+          examKind: entry.examKind,
+          scope: entry.scope ?? '',
+          prepSteps: entry.prepSteps.map((s) => ({
+            id: s.id,
+            text: s.text,
+            dueDate: s.dueDate ?? '',
+          })),
+        }
+      : {
+          examDate: format(addDays(new Date(), 14), 'yyyy-MM-dd'),
+          examKind: 'performance',
+          prepSteps: [{ text: '', dueDate: '' }, { text: '', dueDate: '' }],
+        },
   })
 
   const { fields, append, remove } = useFieldArray({ control, name: 'prepSteps' })
 
   const onSubmit = async (data: ExamFormData) => {
     const now = new Date().toISOString()
+    const existingMap = isEdit && entry ? new Map(entry.prepSteps.map((s) => [s.id, s])) : new Map()
+
     const prepSteps: PrepStep[] = data.prepSteps
       .filter((s) => s.text.trim().length > 0)
-      .map((s) => ({
-        id: nanoid(8),
-        text: s.text.trim(),
-        dueDate: s.dueDate || undefined,
-        done: false,
-      }))
+      .map((s) => {
+        const existing = s.id ? existingMap.get(s.id) : undefined
+        if (existing) {
+          return { ...existing, text: s.text.trim(), dueDate: s.dueDate || undefined }
+        }
+        return {
+          id: nanoid(8),
+          text: s.text.trim(),
+          dueDate: s.dueDate || undefined,
+          done: false,
+        }
+      })
 
-    const entry: ExamEntry = {
-      id: nanoid(),
-      type: 'exam',
-      date: format(new Date(), 'yyyy-MM-dd'),
-      createdAt: now,
-      updatedAt: now,
-      title: data.title,
-      subject: data.subject,
-      examDate: data.examDate,
-      examKind: data.examKind,
-      scope: data.scope || undefined,
-      prepSteps,
+    if (isEdit && entry) {
+      const updated: ExamEntry = {
+        ...entry,
+        title: data.title,
+        subject: data.subject,
+        examDate: data.examDate,
+        examKind: data.examKind,
+        scope: data.scope || undefined,
+        prepSteps,
+        updatedAt: now,
+      }
+      await updateEntry(updated)
+    } else {
+      const newEntry: ExamEntry = {
+        id: nanoid(),
+        type: 'exam',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        createdAt: now,
+        updatedAt: now,
+        title: data.title,
+        subject: data.subject,
+        examDate: data.examDate,
+        examKind: data.examKind,
+        scope: data.scope || undefined,
+        prepSteps,
+      }
+      await addEntry(newEntry)
     }
-    await addEntry(entry)
     onSuccess()
   }
 
@@ -189,7 +226,7 @@ export function ExamForm({ onSuccess, onCancel }: Props) {
           disabled={isSubmitting}
           className="flex-1 bg-rose-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-rose-700 disabled:opacity-50 transition-colors"
         >
-          시험 등록
+          {isEdit ? '수정 저장' : '시험 등록'}
         </button>
       </div>
     </form>

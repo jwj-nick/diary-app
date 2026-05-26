@@ -11,6 +11,7 @@ import type { StudyEntry, Understanding } from '@/types/diary'
 import { cn } from '@/lib/utils'
 
 const SUBJECTS = ['국어', '영어', '수학', '과학', '사회', '역사', '독서', '코딩', '직접입력']
+const STANDARD_SUBJECTS = ['국어', '영어', '수학', '과학', '사회', '역사', '독서', '코딩']
 const DURATIONS = [
   { label: '15분', value: 15 },
   { label: '30분', value: 30 },
@@ -20,6 +21,7 @@ const DURATIONS = [
   { label: '120분', value: 120 },
   { label: '직접입력', value: 0 },
 ]
+const STANDARD_DURATIONS = [15, 30, 45, 60, 90, 120]
 const UNDERSTANDING_EMOJIS: { value: Understanding; emoji: string; label: string }[] = [
   { value: 1, emoji: '😵', label: '어려워요' },
   { value: 2, emoji: '🤔', label: '조금 어려워요' },
@@ -30,12 +32,17 @@ const UNDERSTANDING_EMOJIS: { value: Understanding; emoji: string; label: string
 interface Props {
   onSuccess: () => void
   onCancel: () => void
+  entry?: StudyEntry
 }
 
-export function StudyLogForm({ onSuccess, onCancel }: Props) {
-  const addEntry = useDiaryStore((s) => s.addEntry)
-  const [showCustomSubject, setShowCustomSubject] = useState(false)
-  const [showCustomDuration, setShowCustomDuration] = useState(false)
+export function StudyLogForm({ onSuccess, onCancel, entry }: Props) {
+  const { addEntry, updateEntry } = useDiaryStore()
+  const isEdit = !!entry
+
+  const isCustomSubject = entry ? !STANDARD_SUBJECTS.includes(entry.subject) : false
+  const isCustomDuration = entry ? !STANDARD_DURATIONS.includes(entry.durationMinutes) : false
+  const [showCustomSubject, setShowCustomSubject] = useState(isCustomSubject)
+  const [showCustomDuration, setShowCustomDuration] = useState(isCustomDuration)
 
   const {
     register,
@@ -46,11 +53,22 @@ export function StudyLogForm({ onSuccess, onCancel }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<StudyFormData>({
     resolver: zodResolver(studySchema),
-    defaultValues: {
-      date: format(new Date(), 'yyyy-MM-dd'),
-      understanding: 3,
-      durationMinutes: 30,
-    },
+    defaultValues: entry
+      ? {
+          date: entry.date,
+          subject: isCustomSubject ? '직접입력' : entry.subject,
+          customSubject: isCustomSubject ? entry.subject : '',
+          topic: entry.topic,
+          durationMinutes: entry.durationMinutes,
+          understanding: entry.understanding,
+          note: entry.note ?? '',
+          questions: entry.questions ?? '',
+        }
+      : {
+          date: format(new Date(), 'yyyy-MM-dd'),
+          understanding: 3,
+          durationMinutes: 30,
+        },
   })
 
   const understanding = watch('understanding')
@@ -58,20 +76,35 @@ export function StudyLogForm({ onSuccess, onCancel }: Props) {
   const onSubmit = async (data: StudyFormData) => {
     const subjectValue = data.subject === '직접입력' ? (data.customSubject ?? '') : data.subject
     const now = new Date().toISOString()
-    const entry: StudyEntry = {
-      id: nanoid(),
-      type: 'study',
-      date: data.date,
-      createdAt: now,
-      updatedAt: now,
-      subject: subjectValue,
-      topic: data.topic,
-      durationMinutes: data.durationMinutes,
-      understanding: data.understanding as Understanding,
-      note: data.note || undefined,
-      questions: data.questions || undefined,
+    if (isEdit && entry) {
+      const updated: StudyEntry = {
+        ...entry,
+        date: data.date,
+        subject: subjectValue,
+        topic: data.topic,
+        durationMinutes: data.durationMinutes,
+        understanding: data.understanding as Understanding,
+        note: data.note || undefined,
+        questions: data.questions || undefined,
+        updatedAt: now,
+      }
+      await updateEntry(updated)
+    } else {
+      const newEntry: StudyEntry = {
+        id: nanoid(),
+        type: 'study',
+        date: data.date,
+        createdAt: now,
+        updatedAt: now,
+        subject: subjectValue,
+        topic: data.topic,
+        durationMinutes: data.durationMinutes,
+        understanding: data.understanding as Understanding,
+        note: data.note || undefined,
+        questions: data.questions || undefined,
+      }
+      await addEntry(newEntry)
     }
-    await addEntry(entry)
     onSuccess()
   }
 
@@ -256,7 +289,7 @@ export function StudyLogForm({ onSuccess, onCancel }: Props) {
           disabled={isSubmitting}
           className="flex-1 bg-blue-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-blue-700 disabled:opacity-50 transition-colors"
         >
-          저장하기
+          {isEdit ? '수정 저장' : '저장하기'}
         </button>
       </div>
     </form>

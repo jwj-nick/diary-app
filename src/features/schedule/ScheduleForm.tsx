@@ -8,39 +8,69 @@ import type { ScheduleEntry } from '@/types/diary'
 
 interface Props {
   onSaved?: () => void
+  entry?: ScheduleEntry
 }
 
-export function ScheduleForm({ onSaved }: Props) {
-  const { addEntry } = useDiaryStore()
+export function ScheduleForm({ onSaved, entry }: Props) {
+  const { addEntry, updateEntry } = useDiaryStore()
+  const isEdit = !!entry
 
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<ScheduleFormData>({
     resolver: zodResolver(scheduleSchema),
-    defaultValues: {
-      startDate: format(new Date(), 'yyyy-MM-dd'),
-      allDay: true,
-    },
+    defaultValues: entry
+      ? {
+          title: entry.title,
+          startDate: entry.startDate,
+          startTime: entry.startTime ?? '',
+          endDate: entry.endDate ?? '',
+          endTime: entry.endTime ?? '',
+          allDay: entry.allDay ?? true,
+          location: entry.location ?? '',
+          note: entry.note ?? '',
+        }
+      : {
+          startDate: format(new Date(), 'yyyy-MM-dd'),
+          allDay: true,
+        },
   })
 
   const allDay = watch('allDay')
 
   const onSubmit = async (data: ScheduleFormData) => {
     const now = new Date().toISOString()
-    const entry: ScheduleEntry = {
-      id: nanoid(),
-      type: 'schedule',
-      date: data.startDate,
-      createdAt: now,
-      updatedAt: now,
-      title: data.title,
-      startDate: data.startDate,
-      startTime: data.allDay ? undefined : data.startTime,
-      endDate: data.endDate || undefined,
-      endTime: data.allDay ? undefined : data.endTime,
-      location: data.location || undefined,
-      note: data.note || undefined,
-      allDay: data.allDay,
+    if (isEdit && entry) {
+      const updated: ScheduleEntry = {
+        ...entry,
+        title: data.title,
+        date: data.startDate,
+        startDate: data.startDate,
+        startTime: data.allDay ? undefined : data.startTime,
+        endDate: data.endDate || undefined,
+        endTime: data.allDay ? undefined : data.endTime,
+        location: data.location || undefined,
+        note: data.note || undefined,
+        allDay: data.allDay,
+        updatedAt: now,
+      }
+      await updateEntry(updated)
+    } else {
+      const newEntry: ScheduleEntry = {
+        id: nanoid(),
+        type: 'schedule',
+        date: data.startDate,
+        createdAt: now,
+        updatedAt: now,
+        title: data.title,
+        startDate: data.startDate,
+        startTime: data.allDay ? undefined : data.startTime,
+        endDate: data.endDate || undefined,
+        endTime: data.allDay ? undefined : data.endTime,
+        location: data.location || undefined,
+        note: data.note || undefined,
+        allDay: data.allDay,
+      }
+      await addEntry(newEntry)
     }
-    await addEntry(entry)
     onSaved?.()
   }
 
@@ -137,7 +167,7 @@ export function ScheduleForm({ onSaved }: Props) {
         disabled={isSubmitting}
         className="w-full bg-sky-600 text-white rounded-xl py-3 text-sm font-semibold hover:bg-sky-700 transition-colors disabled:opacity-50"
       >
-        {isSubmitting ? '저장 중...' : '일정 저장'}
+        {isSubmitting ? '저장 중...' : isEdit ? '수정 저장' : '일정 저장'}
       </button>
     </form>
   )

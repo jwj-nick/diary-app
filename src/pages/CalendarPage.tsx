@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, isSameDay, differenceInCalendarDays } from 'date-fns'
 import { ko } from 'date-fns/locale'
-import { Plus, Trash2 } from 'lucide-react'
+import { Plus, Trash2, Pencil } from 'lucide-react'
 import { useDiaryStore } from '@/store/diary.store'
 import { useAuthStore } from '@/store/auth.store'
 import type { DiaryEntry, EntryType } from '@/types/diary'
@@ -33,13 +33,14 @@ const TYPE_DOT: Record<EntryType, string> = {
 export function CalendarPage() {
   const navigate = useNavigate()
   const { entries, loadEntries, softDelete, toggleStep } = useDiaryStore()
-  const { viewMode } = useAuthStore()
+  const { viewMode, viewAsUserId } = useAuthStore()
+  const canWrite = !viewAsUserId
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
 
   useEffect(() => {
     loadEntries()
-  }, [loadEntries, viewMode])
+  }, [loadEntries, viewMode, viewAsUserId])
 
   const activeEntries = useMemo(() => entries.filter((e) => !e.deletedAt), [entries])
 
@@ -62,13 +63,15 @@ export function CalendarPage() {
           </span>
         ))}
         <div className="ml-auto" />
-        <button
-          onClick={() => navigate('/write')}
-          className="inline-flex items-center gap-1 text-xs bg-zinc-900 text-white px-3 py-1.5 rounded-lg hover:bg-zinc-700"
-        >
-          <Plus className="h-3.5 w-3.5" />
-          새 일기
-        </button>
+        {canWrite && (
+          <button
+            onClick={() => navigate('/write')}
+            className="inline-flex items-center gap-1 text-xs bg-zinc-900 text-white px-3 py-1.5 rounded-lg hover:bg-zinc-700"
+          >
+            <Plus className="h-3.5 w-3.5" />
+            새 일기
+          </button>
+        )}
       </div>
 
       {/* Calendar */}
@@ -78,7 +81,7 @@ export function CalendarPage() {
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
         entries={activeEntries}
-        onAddOnDate={() => navigate('/write')}
+        onAddOnDate={canWrite ? () => navigate('/write') : undefined}
       />
 
       {/* Selected day detail */}
@@ -92,14 +95,16 @@ export function CalendarPage() {
         {selectedDayEntries.length === 0 ? (
           <div className="text-center py-6 text-zinc-400 text-sm">
             이 날은 기록이 없어요
-            <div className="mt-2">
-              <button
-                onClick={() => navigate('/write')}
-                className="text-xs text-zinc-700 underline hover:text-zinc-900"
-              >
-                새 일기 작성하기
-              </button>
-            </div>
+            {canWrite && (
+              <div className="mt-2">
+                <button
+                  onClick={() => navigate('/write')}
+                  className="text-xs text-zinc-700 underline hover:text-zinc-900"
+                >
+                  새 일기 작성하기
+                </button>
+              </div>
+            )}
           </div>
         ) : (
           <div className="space-y-2">
@@ -107,6 +112,8 @@ export function CalendarPage() {
               <DayEntryRow
                 key={entry.id}
                 entry={entry}
+                canWrite={canWrite}
+                onEdit={() => navigate(`/write?id=${entry.id}`)}
                 onDelete={() => softDelete(entry.id)}
                 onToggleStep={(stepId) => toggleStep(entry.id, stepId)}
               />
@@ -120,11 +127,13 @@ export function CalendarPage() {
 
 interface RowProps {
   entry: DiaryEntry
+  canWrite: boolean
+  onEdit: () => void
   onDelete: () => void
   onToggleStep: (stepId: string) => void
 }
 
-function DayEntryRow({ entry, onDelete, onToggleStep }: RowProps) {
+function DayEntryRow({ entry, canWrite, onEdit, onDelete, onToggleStep }: RowProps) {
   const title = getEntryShortTitle(entry)
   const daysUntil =
     entry.type === 'exam'
@@ -181,13 +190,24 @@ function DayEntryRow({ entry, onDelete, onToggleStep }: RowProps) {
           <PrepProgress entry={entry} onToggle={onToggleStep} />
         )}
       </div>
-      <button
-        onClick={onDelete}
-        title="삭제"
-        className="p-1 rounded hover:bg-red-50 text-zinc-300 hover:text-red-500"
-      >
-        <Trash2 className="h-3.5 w-3.5" />
-      </button>
+      {canWrite && (
+        <div className="flex gap-0.5 flex-shrink-0">
+          <button
+            onClick={onEdit}
+            title="수정"
+            className="p-1 rounded hover:bg-zinc-100 text-zinc-300 hover:text-zinc-700"
+          >
+            <Pencil className="h-3.5 w-3.5" />
+          </button>
+          <button
+            onClick={onDelete}
+            title="삭제"
+            className="p-1 rounded hover:bg-red-50 text-zinc-300 hover:text-red-500"
+          >
+            <Trash2 className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      )}
     </div>
   )
 }

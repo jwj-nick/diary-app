@@ -10,55 +10,77 @@ import type { TodoEntry, TodoItem } from '@/types/diary'
 
 interface Props {
   onSaved?: () => void
+  entry?: TodoEntry
 }
 
-export function TodoForm({ onSaved }: Props) {
-  const { addEntry } = useDiaryStore()
-  const [itemTexts, setItemTexts] = useState<string[]>([''])
+type FormItem = { id?: string; text: string }
+
+export function TodoForm({ onSaved, entry }: Props) {
+  const { addEntry, updateEntry } = useDiaryStore()
+  const isEdit = !!entry
+
+  const initialItems: FormItem[] = entry
+    ? entry.items.map((i) => ({ id: i.id, text: i.text }))
+    : [{ text: '' }]
+  const [itemsState, setItemsState] = useState<FormItem[]>(initialItems)
 
   const { register, handleSubmit, setValue, formState: { errors, isSubmitting } } = useForm<TodoFormData>({
     resolver: zodResolver(todoSchema),
-    defaultValues: {
-      dueDate: format(new Date(), 'yyyy-MM-dd'),
-      items: [''],
-    },
+    defaultValues: entry
+      ? { title: entry.title, dueDate: entry.dueDate ?? '', items: initialItems }
+      : { dueDate: format(new Date(), 'yyyy-MM-dd'), items: initialItems },
   })
 
-  const syncItems = (texts: string[]) => {
-    setItemTexts(texts)
-    setValue('items', texts.filter((t) => t.trim() !== ''), { shouldValidate: true })
+  const syncItems = (items: FormItem[]) => {
+    setItemsState(items)
+    setValue('items', items.filter((i) => i.text.trim() !== ''), { shouldValidate: true })
   }
 
-  const addItem = () => syncItems([...itemTexts, ''])
-
+  const addItem = () => syncItems([...itemsState, { text: '' }])
   const updateItem = (i: number, val: string) => {
-    const next = [...itemTexts]
-    next[i] = val
+    const next = [...itemsState]
+    next[i] = { ...next[i], text: val }
     syncItems(next)
   }
-
-  const removeItem = (i: number) => {
-    syncItems(itemTexts.filter((_, idx) => idx !== i))
-  }
+  const removeItem = (i: number) => syncItems(itemsState.filter((_, idx) => idx !== i))
 
   const onSubmit = async (data: TodoFormData) => {
     const now = new Date().toISOString()
-    const items: TodoItem[] = data.items.map((text) => ({
-      id: nanoid(),
-      text,
-      done: false,
-    }))
-    const entry: TodoEntry = {
-      id: nanoid(),
-      type: 'todo',
-      date: data.dueDate ?? format(new Date(), 'yyyy-MM-dd'),
-      createdAt: now,
-      updatedAt: now,
-      title: data.title,
-      dueDate: data.dueDate || undefined,
-      items,
+    const existingMap = isEdit && entry ? new Map(entry.items.map((i) => [i.id, i])) : new Map()
+
+    const items: TodoItem[] = data.items.map((item) => {
+      const existing = item.id ? existingMap.get(item.id) : undefined
+      if (existing) {
+        return { ...existing, text: item.text }
+      }
+      return { id: nanoid(), text: item.text, done: false }
+    })
+
+    if (isEdit && entry) {
+      const allDone = items.length > 0 && items.every((i) => i.done)
+      const updated: TodoEntry = {
+        ...entry,
+        title: data.title,
+        date: data.dueDate ?? entry.date,
+        dueDate: data.dueDate || undefined,
+        items,
+        completedAt: allDone ? entry.completedAt ?? now : undefined,
+        updatedAt: now,
+      }
+      await updateEntry(updated)
+    } else {
+      const newEntry: TodoEntry = {
+        id: nanoid(),
+        type: 'todo',
+        date: data.dueDate ?? format(new Date(), 'yyyy-MM-dd'),
+        createdAt: now,
+        updatedAt: now,
+        title: data.title,
+        dueDate: data.dueDate || undefined,
+        items,
+      }
+      await addEntry(newEntry)
     }
-    await addEntry(entry)
     onSaved?.()
   }
 
@@ -89,16 +111,16 @@ export function TodoForm({ onSaved }: Props) {
       <div>
         <label className="block text-sm font-medium text-zinc-700 mb-2">할일 항목 *</label>
         <div className="space-y-2">
-          {itemTexts.map((text, i) => (
-            <div key={i} className="flex gap-2 items-center">
+          {itemsState.map((item, i) => (
+            <div key={item.id ?? `new-${i}`} className="flex gap-2 items-center">
               <span className="text-zinc-300 text-sm">○</span>
               <input
-                value={text}
+                value={item.text}
                 onChange={(e) => updateItem(i, e.target.value)}
                 placeholder={`할일 ${i + 1}`}
                 className="flex-1 px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
               />
-              {itemTexts.length > 1 && (
+              {itemsState.length > 1 && (
                 <button type="button" onClick={() => removeItem(i)} className="p-1 text-zinc-400 hover:text-zinc-600">
                   <X className="h-4 w-4" />
                 </button>
@@ -106,7 +128,7 @@ export function TodoForm({ onSaved }: Props) {
             </div>
           ))}
         </div>
-        {errors.items && <p className="text-xs text-red-500 mt-1">{errors.items.message}</p>}
+        {errors.items && <p className="text-xs text-red-500 mt-1">할일을 1개 이상 입력하세요</p>}
         <button
           type="button"
           onClick={addItem}
@@ -121,7 +143,7 @@ export function TodoForm({ onSaved }: Props) {
         disabled={isSubmitting}
         className="w-full bg-orange-500 text-white rounded-xl py-3 text-sm font-semibold hover:bg-orange-600 transition-colors disabled:opacity-50"
       >
-        {isSubmitting ? '저장 중...' : '할일 목록 저장'}
+        {isSubmitting ? '저장 중...' : isEdit ? '수정 저장' : '할일 목록 저장'}
       </button>
     </form>
   )

@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, differenceInCalendarDays } from 'date-fns'
-import { Trash2, RotateCcw, X, Target, FileText, CalendarClock, CheckSquare } from 'lucide-react'
+import { Trash2, RotateCcw, X, Pencil, Target, FileText, CalendarClock, CheckSquare } from 'lucide-react'
 import { useDiaryStore } from '@/store/diary.store'
 import { useAuthStore } from '@/store/auth.store'
 import type { DiaryEntry, EntryType } from '@/types/diary'
@@ -36,7 +36,8 @@ function TypeBadge({ type }: { type: EntryType }) {
   )
 }
 
-function EntryCard({ entry, isTrash }: { entry: DiaryEntry; isTrash: boolean }) {
+function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: boolean; canWrite: boolean }) {
+  const navigate = useNavigate()
   const { softDelete, restore, permanentDelete, toggleStep } = useDiaryStore()
   const title = getEntryShortTitle(entry)
 
@@ -207,13 +208,26 @@ function EntryCard({ entry, isTrash }: { entry: DiaryEntry; isTrash: boolean }) 
               </button>
             </>
           ) : (
-            <button
-              onClick={() => softDelete(entry.id)}
-              title="삭제"
-              className="p-1.5 rounded-lg hover:bg-red-50 text-zinc-400 hover:text-red-500"
-            >
-              <Trash2 className="h-3.5 w-3.5" />
-            </button>
+            <>
+              {canWrite && (
+                <button
+                  onClick={() => navigate(`/write?id=${entry.id}`)}
+                  title="수정"
+                  className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700"
+                >
+                  <Pencil className="h-3.5 w-3.5" />
+                </button>
+              )}
+              {canWrite && (
+                <button
+                  onClick={() => softDelete(entry.id)}
+                  title="삭제"
+                  className="p-1.5 rounded-lg hover:bg-red-50 text-zinc-400 hover:text-red-500"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </>
           )}
         </div>
       </div>
@@ -245,11 +259,12 @@ function ProgressBar({ done, total, color }: { done: number; total: number; colo
 export function HomePage() {
   const navigate = useNavigate()
   const { entries, loading, filterType, searchQuery, loadEntries, setSearchQuery } = useDiaryStore()
-  const { viewMode } = useAuthStore()
+  const { viewMode, viewAsUserId } = useAuthStore()
+  const canWrite = !viewAsUserId
 
   useEffect(() => {
     loadEntries()
-  }, [loadEntries, viewMode])
+  }, [loadEntries, viewMode, viewAsUserId])
 
   const displayed = useMemo(() => {
     const isTrash = filterType === 'trash'
@@ -312,7 +327,7 @@ export function HomePage() {
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
         <h1 className="text-lg font-semibold text-zinc-900">{pageTitle}</h1>
-        {!isTrash && (
+        {!isTrash && canWrite && (
           <button
             onClick={() => navigate('/write')}
             className="text-sm bg-zinc-900 text-white px-3 py-1.5 rounded-lg hover:bg-zinc-700 transition-colors"
@@ -338,7 +353,7 @@ export function HomePage() {
           <p className="text-sm">
             {searchQuery ? '검색 결과가 없어요' : isTrash ? '삭제된 일기가 없어요' : '아직 일기가 없어요. 첫 일기를 써볼까요?'}
           </p>
-          {!isTrash && !searchQuery && (
+          {!isTrash && !searchQuery && canWrite && (
             <button
               onClick={() => navigate('/write')}
               className="mt-4 text-sm bg-zinc-900 text-white px-4 py-2 rounded-lg hover:bg-zinc-700 transition-colors"
@@ -350,7 +365,7 @@ export function HomePage() {
       ) : (
         <div className="space-y-3">
           {displayed.map((entry) => (
-            <EntryCard key={entry.id} entry={entry} isTrash={isTrash} />
+            <EntryCard key={entry.id} entry={entry} isTrash={isTrash} canWrite={canWrite} />
           ))}
         </div>
       )}

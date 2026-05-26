@@ -33,7 +33,8 @@ function TypeDot({ type }: { type: EntryType }) {
 export function Sidebar({ onClose }: Props) {
   const navigate = useNavigate()
   const { entries, filterType, setFilterType } = useDiaryStore()
-  const { profile, viewMode, setViewMode, signOut } = useAuthStore()
+  const { profile, viewMode, viewAsUserId, setViewMode, signOut } = useAuthStore()
+  const canWrite = !viewAsUserId
   const [libraryOpen, setLibraryOpen] = useState(true)
   const [planningOpen, setPlanningOpen] = useState(true)
 
@@ -86,8 +87,10 @@ export function Sidebar({ onClose }: Props) {
       {/* New Entry Button */}
       <div className="px-3 py-3">
         <button
-          onClick={() => handleNavClick('/write')}
-          className="w-full flex items-center justify-center gap-2 bg-zinc-900 text-white rounded-lg py-2 text-sm font-medium hover:bg-zinc-700 transition-colors"
+          onClick={() => canWrite && handleNavClick('/write')}
+          disabled={!canWrite}
+          title={canWrite ? '' : '조회 전용 모드에서는 작성할 수 없습니다'}
+          className="w-full flex items-center justify-center gap-2 bg-zinc-900 text-white rounded-lg py-2 text-sm font-medium hover:bg-zinc-700 transition-colors disabled:bg-zinc-300 disabled:cursor-not-allowed"
         >
           <PenLine className="h-4 w-4" />
           새 항목 작성

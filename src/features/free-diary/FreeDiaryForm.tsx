@@ -9,10 +9,12 @@ import type { FreeDiaryEntry } from '@/types/diary'
 interface Props {
   onSuccess: () => void
   onCancel: () => void
+  entry?: FreeDiaryEntry
 }
 
-export function FreeDiaryForm({ onSuccess, onCancel }: Props) {
-  const addEntry = useDiaryStore((s) => s.addEntry)
+export function FreeDiaryForm({ onSuccess, onCancel, entry }: Props) {
+  const { addEntry, updateEntry } = useDiaryStore()
+  const isEdit = !!entry
 
   const {
     register,
@@ -20,23 +22,34 @@ export function FreeDiaryForm({ onSuccess, onCancel }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<FreeDiaryFormData>({
     resolver: zodResolver(freeDiarySchema),
-    defaultValues: {
-      date: format(new Date(), 'yyyy-MM-dd'),
-    },
+    defaultValues: entry
+      ? { date: entry.date, title: entry.title ?? '', body: entry.body }
+      : { date: format(new Date(), 'yyyy-MM-dd') },
   })
 
   const onSubmit = async (data: FreeDiaryFormData) => {
     const now = new Date().toISOString()
-    const entry: FreeDiaryEntry = {
-      id: nanoid(),
-      type: 'free',
-      date: data.date,
-      createdAt: now,
-      updatedAt: now,
-      title: data.title || undefined,
-      body: data.body,
+    if (isEdit && entry) {
+      const updated: FreeDiaryEntry = {
+        ...entry,
+        date: data.date,
+        title: data.title || undefined,
+        body: data.body,
+        updatedAt: now,
+      }
+      await updateEntry(updated)
+    } else {
+      const newEntry: FreeDiaryEntry = {
+        id: nanoid(),
+        type: 'free',
+        date: data.date,
+        createdAt: now,
+        updatedAt: now,
+        title: data.title || undefined,
+        body: data.body,
+      }
+      await addEntry(newEntry)
     }
-    await addEntry(entry)
     onSuccess()
   }
 
@@ -86,7 +99,7 @@ export function FreeDiaryForm({ onSuccess, onCancel }: Props) {
           disabled={isSubmitting}
           className="flex-1 bg-amber-500 text-white rounded-lg py-2 text-sm font-medium hover:bg-amber-600 disabled:opacity-50 transition-colors"
         >
-          저장하기
+          {isEdit ? '수정 저장' : '저장하기'}
         </button>
       </div>
     </form>

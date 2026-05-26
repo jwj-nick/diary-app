@@ -1,5 +1,6 @@
 import { Sidebar } from './Sidebar'
 import { BottomNav } from './BottomNav'
+import { ViewAsBanner } from './ViewAsBanner'
 
 interface Props {
   children: React.ReactNode
@@ -15,6 +16,7 @@ export function AppShell({ children }: Props) {
 
       {/* Main content */}
       <main className="flex-1 md:ml-64 flex flex-col min-h-screen overflow-y-auto">
+        <ViewAsBanner />
         <div className="flex-1 p-4 md:p-6 pb-24 md:pb-6">
           {children}
         </div>

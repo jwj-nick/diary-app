@@ -11,10 +11,12 @@ import { cn } from '@/lib/utils'
 interface Props {
   onSuccess: () => void
   onCancel: () => void
+  entry?: ReadingEntry
 }
 
-export function ReadingLogForm({ onSuccess, onCancel }: Props) {
-  const addEntry = useDiaryStore((s) => s.addEntry)
+export function ReadingLogForm({ onSuccess, onCancel, entry }: Props) {
+  const { addEntry, updateEntry } = useDiaryStore()
+  const isEdit = !!entry
   const [hoverRating, setHoverRating] = useState(0)
 
   const {
@@ -25,30 +27,57 @@ export function ReadingLogForm({ onSuccess, onCancel }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<ReadingFormData>({
     resolver: zodResolver(readingSchema),
-    defaultValues: {
-      date: format(new Date(), 'yyyy-MM-dd'),
-    },
+    defaultValues: entry
+      ? {
+          date: entry.date,
+          bookTitle: entry.bookTitle,
+          author: entry.author ?? '',
+          pagesFrom: entry.pagesFrom,
+          pagesTo: entry.pagesTo,
+          quote: entry.quote ?? '',
+          thought: entry.thought ?? '',
+          rating: entry.rating,
+        }
+      : {
+          date: format(new Date(), 'yyyy-MM-dd'),
+        },
   })
 
   const rating = watch('rating')
 
   const onSubmit = async (data: ReadingFormData) => {
     const now = new Date().toISOString()
-    const entry: ReadingEntry = {
-      id: nanoid(),
-      type: 'reading',
-      date: data.date,
-      createdAt: now,
-      updatedAt: now,
-      bookTitle: data.bookTitle,
-      author: data.author || undefined,
-      pagesFrom: data.pagesFrom || undefined,
-      pagesTo: data.pagesTo || undefined,
-      quote: data.quote || undefined,
-      thought: data.thought || undefined,
-      rating: data.rating,
+    if (isEdit && entry) {
+      const updated: ReadingEntry = {
+        ...entry,
+        date: data.date,
+        bookTitle: data.bookTitle,
+        author: data.author || undefined,
+        pagesFrom: data.pagesFrom || undefined,
+        pagesTo: data.pagesTo || undefined,
+        quote: data.quote || undefined,
+        thought: data.thought || undefined,
+        rating: data.rating,
+        updatedAt: now,
+      }
+      await updateEntry(updated)
+    } else {
+      const newEntry: ReadingEntry = {
+        id: nanoid(),
+        type: 'reading',
+        date: data.date,
+        createdAt: now,
+        updatedAt: now,
+        bookTitle: data.bookTitle,
+        author: data.author || undefined,
+        pagesFrom: data.pagesFrom || undefined,
+        pagesTo: data.pagesTo || undefined,
+        quote: data.quote || undefined,
+        thought: data.thought || undefined,
+        rating: data.rating,
+      }
+      await addEntry(newEntry)
     }
-    await addEntry(entry)
     onSuccess()
   }
 
@@ -176,7 +205,7 @@ export function ReadingLogForm({ onSuccess, onCancel }: Props) {
           disabled={isSubmitting}
           className="flex-1 bg-emerald-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-emerald-700 disabled:opacity-50 transition-colors"
         >
-          저장하기
+          {isEdit ? '수정 저장' : '저장하기'}
         </button>
       </div>
     </form>

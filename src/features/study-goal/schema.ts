@@ -1,6 +1,7 @@
 import { z } from 'zod'
 
 export const goalStepSchema = z.object({
+  id: z.string().optional(),
   text: z.string().min(1, '내용을 입력해주세요'),
 })
 

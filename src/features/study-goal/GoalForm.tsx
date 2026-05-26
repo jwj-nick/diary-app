@@ -12,10 +12,12 @@ const SUBJECTS = ['국어', '영어', '수학', '과학', '사회', '역사', '�
 interface Props {
   onSuccess: () => void
   onCancel: () => void
+  entry?: StudyGoalEntry
 }
 
-export function GoalForm({ onSuccess, onCancel }: Props) {
-  const addEntry = useDiaryStore((s) => s.addEntry)
+export function GoalForm({ onSuccess, onCancel, entry }: Props) {
+  const { addEntry, updateEntry } = useDiaryStore()
+  const isEdit = !!entry
 
   const {
     register,
@@ -24,34 +26,66 @@ export function GoalForm({ onSuccess, onCancel }: Props) {
     formState: { errors, isSubmitting },
   } = useForm<GoalFormData>({
     resolver: zodResolver(goalSchema),
-    defaultValues: {
-      targetDate: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
-      steps: [{ text: '' }, { text: '' }, { text: '' }],
-    },
+    defaultValues: entry
+      ? {
+          title: entry.title,
+          subject: entry.subject ?? '',
+          targetDate: entry.targetDate,
+          description: entry.description ?? '',
+          steps: entry.steps.map((s) => ({ id: s.id, text: s.text })),
+        }
+      : {
+          targetDate: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
+          steps: [{ text: '' }, { text: '' }, { text: '' }],
+        },
   })
 
   const { fields, append, remove } = useFieldArray({ control, name: 'steps' })
 
   const onSubmit = async (data: GoalFormData) => {
     const now = new Date().toISOString()
+    const existingMap = isEdit && entry ? new Map(entry.steps.map((s) => [s.id, s])) : new Map()
+
     const steps: GoalStep[] = data.steps
       .filter((s) => s.text.trim().length > 0)
-      .map((s) => ({ id: nanoid(8), text: s.text.trim(), done: false }))
+      .map((s) => {
+        const existing = s.id ? existingMap.get(s.id) : undefined
+        if (existing) {
+          return { ...existing, text: s.text.trim() }
+        }
+        return { id: nanoid(8), text: s.text.trim(), done: false }
+      })
 
-    const entry: StudyGoalEntry = {
-      id: nanoid(),
-      type: 'goal',
-      date: format(new Date(), 'yyyy-MM-dd'),
-      createdAt: now,
-      updatedAt: now,
-      title: data.title,
-      subject: data.subject || undefined,
-      targetDate: data.targetDate,
-      description: data.description || undefined,
-      steps,
-      status: 'in_progress',
+    if (isEdit && entry) {
+      const allDone = steps.length > 0 && steps.every((s) => s.done)
+      const updated: StudyGoalEntry = {
+        ...entry,
+        title: data.title,
+        subject: data.subject || undefined,
+        targetDate: data.targetDate,
+        description: data.description || undefined,
+        steps,
+        status: allDone ? 'completed' : 'in_progress',
+        completedAt: allDone ? entry.completedAt ?? now : undefined,
+        updatedAt: now,
+      }
+      await updateEntry(updated)
+    } else {
+      const newEntry: StudyGoalEntry = {
+        id: nanoid(),
+        type: 'goal',
+        date: format(new Date(), 'yyyy-MM-dd'),
+        createdAt: now,
+        updatedAt: now,
+        title: data.title,
+        subject: data.subject || undefined,
+        targetDate: data.targetDate,
+        description: data.description || undefined,
+        steps,
+        status: 'in_progress',
+      }
+      await addEntry(newEntry)
     }
-    await addEntry(entry)
     onSuccess()
   }
 
@@ -160,7 +194,7 @@ export function GoalForm({ onSuccess, onCancel }: Props) {
           disabled={isSubmitting}
           className="flex-1 bg-violet-600 text-white rounded-lg py-2 text-sm font-medium hover:bg-violet-700 disabled:opacity-50 transition-colors"
         >
-          목표 만들기
+          {isEdit ? '수정 저장' : '목표 만들기'}
         </button>
       </div>
     </form>
