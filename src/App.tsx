@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { LoginPage } from '@/pages/LoginPage'
 import { useAuthStore } from '@/store/auth.store'
+import { ThemeProvider } from '@/lib/theme'
 
 const HomePage = lazy(() => import('@/pages/HomePage').then((m) => ({ default: m.HomePage })))
 const WritePage = lazy(() => import('@/pages/WritePage').then((m) => ({ default: m.WritePage })))
@@ -12,7 +13,7 @@ const AdminPage = lazy(() => import('@/pages/AdminPage').then((m) => ({ default:
 
 function PageLoading() {
   return (
-    <div className="flex items-center justify-center h-40 text-zinc-400 text-sm">
+    <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">
       불러오는 중...
     </div>
   )
@@ -20,9 +21,9 @@ function PageLoading() {
 
 function AuthLoading() {
   return (
-    <div className="min-h-screen bg-zinc-50 flex flex-col items-center justify-center gap-3">
+    <div className="min-h-screen bg-background text-muted-foreground flex flex-col items-center justify-center gap-3">
       <div className="text-4xl">📓</div>
-      <p className="text-sm text-zinc-400">잠깐만요...</p>
+      <p className="text-sm">잠깐만요...</p>
     </div>
   )
 }
@@ -57,10 +58,12 @@ function App() {
   }, [init])
 
   return (
-    <Routes>
-      <Route path="/login" element={<LoginPublic />} />
-      <Route path="/*" element={<PrivateRoutes />} />
-    </Routes>
+    <ThemeProvider>
+      <Routes>
+        <Route path="/login" element={<LoginPublic />} />
+        <Route path="/*" element={<PrivateRoutes />} />
+      </Routes>
+    </ThemeProvider>
   )
 }
 
