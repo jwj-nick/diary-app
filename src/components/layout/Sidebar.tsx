@@ -4,7 +4,7 @@ import * as Collapsible from '@radix-ui/react-collapsible'
 import {
   ChevronDown, ChevronRight, Calendar, Download, PenLine,
   Target, FileText, CalendarClock, CheckSquare, LogOut, ShieldCheck, User,
-  Sun, Moon, Monitor, Cake, Users,
+  Sun, Moon, Monitor, Cake, Users, Search,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useDiaryStore } from '@/store/diary.store'
@@ -91,8 +91,25 @@ export function Sidebar({ onClose }: Props) {
         </div>
       </div>
 
-      {/* Calendar shortcut (above the New Entry button per Nick's request) */}
+      {/* Command palette trigger (Cmd/Ctrl + K) */}
       <div className="px-3 pt-3">
+        <button
+          onClick={() => {
+            window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', ctrlKey: true }))
+            onClose?.()
+          }}
+          className="w-full flex items-center gap-2 bg-card text-muted-foreground border border-border rounded-lg py-2 px-3 text-sm hover:bg-muted transition-colors"
+        >
+          <Search className="h-3.5 w-3.5" />
+          <span>검색 또는 명령...</span>
+          <kbd className="ml-auto hidden sm:inline-flex h-5 items-center rounded border border-border bg-muted px-1.5 text-[10px] font-medium text-muted-foreground">
+            ⌘K
+          </kbd>
+        </button>
+      </div>
+
+      {/* Calendar shortcut (above the New Entry button per Nick's request) */}
+      <div className="px-3 pt-2">
         <button
           onClick={() => handleNavClick('/calendar')}
           className="w-full flex items-center justify-center gap-2 bg-card text-foreground border border-border rounded-lg py-2 text-sm font-medium hover:bg-muted transition-colors"

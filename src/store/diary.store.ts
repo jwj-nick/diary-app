@@ -1,7 +1,19 @@
 import { create } from 'zustand'
+import { toast } from 'sonner'
 import type { DiaryEntry, EntryType } from '@/types/diary'
 import { getAllEntries, saveEntry, deleteEntry } from '@/lib/storage'
 import { useAuthStore } from './auth.store'
+
+const TYPE_KOREAN: Record<EntryType, string> = {
+  study: '공부 일기',
+  reading: '독서 일기',
+  free: '자유 일기',
+  goal: '목표',
+  exam: '시험',
+  schedule: '일정',
+  todo: '할일',
+  anniversary: '기념일',
+}
 
 type FilterType = EntryType | 'all' | 'trash' | 'planning' | 'family'
 
@@ -47,17 +59,29 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
   addEntry: async (entry: DiaryEntry) => {
     const { userId } = getAuth()
     if (!userId) return
-    await saveEntry(entry, userId)
-    set((state) => ({ entries: [entry, ...state.entries] }))
+    try {
+      await saveEntry(entry, userId)
+      set((state) => ({ entries: [entry, ...state.entries] }))
+      toast.success(`${TYPE_KOREAN[entry.type]} 저장됨`)
+    } catch (err) {
+      toast.error('저장 실패', { description: err instanceof Error ? err.message : String(err) })
+      throw err
+    }
   },
 
   updateEntry: async (entry: DiaryEntry) => {
     const { userId } = getAuth()
     if (!userId) return
-    await saveEntry(entry, userId)
-    set((state) => ({
-      entries: state.entries.map((e) => (e.id === entry.id ? entry : e)),
-    }))
+    try {
+      await saveEntry(entry, userId)
+      set((state) => ({
+        entries: state.entries.map((e) => (e.id === entry.id ? entry : e)),
+      }))
+      toast.success(`${TYPE_KOREAN[entry.type]} 수정됨`)
+    } catch (err) {
+      toast.error('수정 실패', { description: err instanceof Error ? err.message : String(err) })
+      throw err
+    }
   },
 
   softDelete: async (id: string) => {
@@ -66,10 +90,18 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     const { userId } = getAuth()
     if (!userId) return
     const updated: DiaryEntry = { ...entry, deletedAt: new Date().toISOString() }
-    await saveEntry(updated, userId)
-    set((state) => ({
-      entries: state.entries.map((e) => (e.id === id ? updated : e)),
-    }))
+    try {
+      await saveEntry(updated, userId)
+      set((state) => ({
+        entries: state.entries.map((e) => (e.id === id ? updated : e)),
+      }))
+      toast('삭제됨', {
+        description: '휴지통에서 복원할 수 있어요',
+        action: { label: '복원', onClick: () => get().restore(id) },
+      })
+    } catch (err) {
+      toast.error('삭제 실패', { description: err instanceof Error ? err.message : String(err) })
+    }
   },
 
   restore: async (id: string) => {
@@ -79,17 +111,27 @@ export const useDiaryStore = create<DiaryState>((set, get) => ({
     if (!userId) return
     const updated: DiaryEntry = { ...entry }
     delete updated.deletedAt
-    await saveEntry(updated, userId)
-    set((state) => ({
-      entries: state.entries.map((e) => (e.id === id ? updated : e)),
-    }))
+    try {
+      await saveEntry(updated, userId)
+      set((state) => ({
+        entries: state.entries.map((e) => (e.id === id ? updated : e)),
+      }))
+      toast.success('복원됨')
+    } catch (err) {
+      toast.error('복원 실패', { description: err instanceof Error ? err.message : String(err) })
+    }
   },
 
   permanentDelete: async (id: string) => {
-    await deleteEntry(id)
-    set((state) => ({
-      entries: state.entries.filter((e) => e.id !== id),
-    }))
+    try {
+      await deleteEntry(id)
+      set((state) => ({
+        entries: state.entries.filter((e) => e.id !== id),
+      }))
+      toast.success('영구 삭제됨')
+    } catch (err) {
+      toast.error('삭제 실패', { description: err instanceof Error ? err.message : String(err) })
+    }
   },
 
   toggleStep: async (entryId: string, stepId: string) => {

@@ -3,7 +3,9 @@ import { Routes, Route, Navigate } from 'react-router-dom'
 import { AppShell } from '@/components/layout/AppShell'
 import { LoginPage } from '@/pages/LoginPage'
 import { useAuthStore } from '@/store/auth.store'
-import { ThemeProvider } from '@/lib/theme'
+import { ThemeProvider, useTheme } from '@/lib/theme'
+import { Toaster } from 'sonner'
+import { CommandPalette } from '@/components/shared/CommandPalette'
 
 const HomePage = lazy(() => import('@/pages/HomePage').then((m) => ({ default: m.HomePage })))
 const WritePage = lazy(() => import('@/pages/WritePage').then((m) => ({ default: m.WritePage })))
@@ -59,11 +61,33 @@ function App() {
 
   return (
     <ThemeProvider>
+      <AppChrome />
+    </ThemeProvider>
+  )
+}
+
+function AppChrome() {
+  const { resolved } = useTheme()
+  return (
+    <>
       <Routes>
         <Route path="/login" element={<LoginPublic />} />
         <Route path="/*" element={<PrivateRoutes />} />
       </Routes>
-    </ThemeProvider>
+      <CommandPalette />
+      <Toaster
+        theme={resolved}
+        position="top-center"
+        richColors
+        closeButton
+        toastOptions={{
+          style: {
+            fontFamily:
+              "'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+          },
+        }}
+      />
+    </>
   )
 }
 

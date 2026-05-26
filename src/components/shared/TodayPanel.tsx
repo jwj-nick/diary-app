@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { format, isSameDay, differenceInCalendarDays } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { Sparkles, CalendarClock, CheckSquare, Cake, FileText, Target } from 'lucide-react'
+import { motion } from 'motion/react'
 import type { DiaryEntry } from '@/types/diary'
 import { getEntryDisplayDate, getEntryShortTitle } from '@/types/diary'
 import { cn } from '@/lib/utils'
@@ -61,30 +62,66 @@ export function TodayPanel({ entries, greetingName }: Props) {
   const todayTodoCount = todays.filter((e) => e.type === 'todo').length
 
   return (
-    <div className="mb-8 md:mb-10 space-y-5 md:space-y-6">
+    <motion.div
+      className="mb-8 md:mb-10 space-y-5 md:space-y-6"
+      initial="hidden"
+      animate="visible"
+      variants={{
+        hidden: {},
+        visible: { transition: { staggerChildren: 0.08, delayChildren: 0.05 } },
+      }}
+    >
       {/* 큰 헤더 — Day One/Things 3 style hero */}
       <div className="flex items-end justify-between flex-wrap gap-3">
         <div>
-          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2 flex items-center gap-1.5 font-medium">
+          <motion.p
+            variants={{
+              hidden: { opacity: 0, y: 6 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+            }}
+            className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2 flex items-center gap-1.5 font-medium"
+          >
             <Sparkles className="h-3 w-3" />
             오늘
             {greetingName && <span>· {greetingName}</span>}
-          </p>
-          <h1 className="text-5xl md:text-7xl font-bold tracking-[-0.04em] text-foreground leading-[1.02]">
+          </motion.p>
+          <motion.h1
+            variants={{
+              hidden: { opacity: 0, y: 14 },
+              visible: {
+                opacity: 1,
+                y: 0,
+                transition: { duration: 0.55, ease: [0.22, 1, 0.36, 1] },
+              },
+            }}
+            className="text-5xl md:text-7xl font-bold tracking-[-0.04em] text-foreground leading-[1.02]"
+          >
             {format(today, 'M월 d일', { locale: ko })}
-          </h1>
-          <p className="mt-2 text-lg md:text-xl font-medium text-muted-foreground tracking-tight">
+          </motion.h1>
+          <motion.p
+            variants={{
+              hidden: { opacity: 0, y: 10 },
+              visible: { opacity: 1, y: 0, transition: { duration: 0.45 } },
+            }}
+            className="mt-2 text-lg md:text-xl font-medium text-muted-foreground tracking-tight"
+          >
             {format(today, 'EEEE', { locale: ko })}
-          </p>
+          </motion.p>
         </div>
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
+        <motion.div
+          variants={{
+            hidden: { opacity: 0 },
+            visible: { opacity: 1, transition: { duration: 0.5, delay: 0.2 } },
+          }}
+          className="flex items-center gap-3 text-xs text-muted-foreground"
+        >
           {todays.length > 0 && (
             <span>오늘 {todays.length}개 기록</span>
           )}
           {todays.length === 0 && (
             <span>오늘 아직 기록이 없어요</span>
           )}
-        </div>
+        </motion.div>
       </div>
 
       {/* 기념일 강조 (있을 때만) */}
@@ -155,7 +192,7 @@ export function TodayPanel({ entries, greetingName }: Props) {
           )}
         </div>
       )}
-    </div>
+    </motion.div>
   )
 }
 

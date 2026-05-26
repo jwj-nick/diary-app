@@ -2,6 +2,7 @@ import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, differenceInCalendarDays } from 'date-fns'
 import { Trash2, RotateCcw, X, Pencil, Target, FileText, CalendarClock, CheckSquare, Cake, Users } from 'lucide-react'
+import { motion, AnimatePresence } from 'motion/react'
 import { useDiaryStore } from '@/store/diary.store'
 import { useAuthStore } from '@/store/auth.store'
 import type { DiaryEntry, EntryType } from '@/types/diary'
@@ -53,7 +54,12 @@ function EntryCard({
   const isMine = entry.userId === currentUserId
 
   return (
-    <div
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -8 }}
+      transition={{ duration: 0.25, ease: [0.22, 1, 0.36, 1] }}
       className={cn(
         'bg-card rounded-2xl border border-border p-5 md:p-6',
         'border-l-4',
@@ -264,7 +270,7 @@ function EntryCard({
           )}
         </div>
       </div>
-    </div>
+    </motion.div>
   )
 }
 
@@ -417,18 +423,28 @@ export function HomePage() {
           )}
         </div>
       ) : (
-        <div className="space-y-4 md:space-y-5">
-          {displayed.map((entry) => (
-            <EntryCard
-              key={entry.id}
-              entry={entry}
-              isTrash={isTrash}
-              canWrite={canWrite}
-              allProfiles={allProfiles}
-              currentUserId={currentUserId}
-            />
-          ))}
-        </div>
+        <motion.div
+          className="space-y-4 md:space-y-5"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.04 } },
+          }}
+        >
+          <AnimatePresence mode="popLayout">
+            {displayed.map((entry) => (
+              <EntryCard
+                key={entry.id}
+                entry={entry}
+                isTrash={isTrash}
+                canWrite={canWrite}
+                allProfiles={allProfiles}
+                currentUserId={currentUserId}
+              />
+            ))}
+          </AnimatePresence>
+        </motion.div>
       )}
     </div>
   )
