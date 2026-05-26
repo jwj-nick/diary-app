@@ -169,9 +169,9 @@ export function CalendarPage() {
       )}
 
       {/* Selected day detail */}
-      <div className="bg-card rounded-xl border border-border p-4">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="text-sm font-semibold text-foreground">
+      <div className="bg-card rounded-2xl border border-border p-5 md:p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-base md:text-lg font-semibold text-foreground tracking-tight">
             {format(selectedDate, 'M월 d일 (eee)', { locale: ko })}
           </h2>
           <span className="text-xs text-muted-foreground">{selectedDayEntries.length}개 기록</span>

@@ -61,21 +61,21 @@ export function TodayPanel({ entries, greetingName }: Props) {
   const todayTodoCount = todays.filter((e) => e.type === 'todo').length
 
   return (
-    <div className="mb-6 space-y-4">
-      {/* 큰 헤더 */}
-      <div className="flex items-end justify-between flex-wrap gap-2">
+    <div className="mb-8 md:mb-10 space-y-5 md:space-y-6">
+      {/* 큰 헤더 — Day One/Things 3 style hero */}
+      <div className="flex items-end justify-between flex-wrap gap-3">
         <div>
-          <p className="text-sm text-muted-foreground mb-1 flex items-center gap-1.5">
-            <Sparkles className="h-3.5 w-3.5" />
+          <p className="text-xs uppercase tracking-[0.2em] text-muted-foreground mb-2 flex items-center gap-1.5 font-medium">
+            <Sparkles className="h-3 w-3" />
             오늘
             {greetingName && <span>· {greetingName}</span>}
           </p>
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight text-foreground leading-tight">
-            {format(today, 'M월 d일', { locale: ko })}{' '}
-            <span className="text-muted-foreground font-medium">
-              {format(today, 'EEEE', { locale: ko })}
-            </span>
+          <h1 className="text-5xl md:text-7xl font-bold tracking-[-0.04em] text-foreground leading-[1.02]">
+            {format(today, 'M월 d일', { locale: ko })}
           </h1>
+          <p className="mt-2 text-lg md:text-xl font-medium text-muted-foreground tracking-tight">
+            {format(today, 'EEEE', { locale: ko })}
+          </p>
         </div>
         <div className="flex items-center gap-3 text-xs text-muted-foreground">
           {todays.length > 0 && (
@@ -102,10 +102,10 @@ export function TodayPanel({ entries, greetingName }: Props) {
 
       {/* 상황 요약 + upcoming */}
       {(todayScheduleCount > 0 || todayTodoCount > 0 || upcoming.length > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {(todayScheduleCount > 0 || todayTodoCount > 0) && (
-            <div className="rounded-xl border border-border bg-card px-4 py-3">
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium mb-2">
+            <div className="rounded-xl border border-border bg-card px-5 py-4">
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium mb-3">
                 오늘
               </p>
               <div className="space-y-1.5">
@@ -124,8 +124,8 @@ export function TodayPanel({ entries, greetingName }: Props) {
           )}
 
           {upcoming.length > 0 && (
-            <div className="rounded-xl border border-border bg-card px-4 py-3">
-              <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium mb-2">
+            <div className="rounded-xl border border-border bg-card px-5 py-4">
+              <p className="text-[11px] uppercase tracking-widest text-muted-foreground font-medium mb-3">
                 다가오는 7일
               </p>
               <div className="space-y-1.5">

@@ -119,7 +119,7 @@ export function WritePage() {
 
   return (
     <div className="max-w-xl mx-auto">
-      <h1 className="text-lg font-semibold text-foreground mb-4">
+      <h1 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground mb-6">
         {isEdit ? '항목 수정' : '새 항목 작성'}
       </h1>
 
@@ -169,7 +169,7 @@ export function WritePage() {
         </>
       )}
 
-      <div className="bg-card rounded-xl border border-border p-5">
+      <div className="bg-card rounded-2xl border border-border p-5 md:p-6">
         {activeSub === 'study' && (
           <StudyLogForm
             entry={editEntry?.type === 'study' ? editEntry : undefined}

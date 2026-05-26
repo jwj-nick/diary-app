@@ -22,20 +22,11 @@ const TYPE_LABEL: Record<EntryType, string> = {
   anniversary: '기념일',
 }
 
-const TYPE_BADGE: Record<EntryType, string> = {
-  study: 'bg-blue-500/15 text-blue-700 dark:text-blue-300',
-  reading: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-  free: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
-  goal: 'bg-violet-500/15 text-violet-700 dark:text-violet-300',
-  exam: 'bg-rose-500/15 text-rose-700 dark:text-rose-300',
-  schedule: 'bg-sky-500/15 text-sky-700 dark:text-sky-300',
-  todo: 'bg-orange-500/15 text-orange-700 dark:text-orange-300',
-  anniversary: 'bg-pink-500/15 text-pink-700 dark:text-pink-300',
-}
-
+// Day One / Things 3 style: badges are all muted; color signal comes from
+// the user accent border + the colored icon next to the title + the calendar.
 function TypeBadge({ type }: { type: EntryType }) {
   return (
-    <span className={cn('inline-block text-xs font-medium px-2 py-0.5 rounded-full', TYPE_BADGE[type])}>
+    <span className="inline-block text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-full bg-muted text-muted-foreground">
       {TYPE_LABEL[type]}
     </span>
   )
@@ -64,10 +55,10 @@ function EntryCard({
   return (
     <div
       className={cn(
-        'bg-card rounded-xl border border-border p-4',
+        'bg-card rounded-2xl border border-border p-5 md:p-6',
         'border-l-4',
         accent.borderClass,
-        'hover:-translate-y-0.5 hover:shadow-md transition-all duration-150'
+        'hover:border-foreground/20 transition-colors duration-150'
       )}
     >
       <div className="flex items-start justify-between gap-2">
@@ -381,30 +372,32 @@ export function HomePage() {
         />
       )}
 
-      <div className="flex items-center justify-between mb-4">
-        <h1 className={cn(
-          'font-semibold text-foreground',
-          showTodayPanel ? 'text-base text-muted-foreground' : 'text-lg'
+      <div className="flex items-center justify-between mb-5">
+        <h2 className={cn(
+          'font-semibold text-foreground tracking-tight',
+          showTodayPanel
+            ? 'text-xs uppercase tracking-[0.2em] text-muted-foreground font-medium'
+            : 'text-2xl md:text-3xl'
         )}>
           {showTodayPanel ? '최근 기록' : pageTitle}
-        </h1>
+        </h2>
         {!isTrash && canWrite && !showTodayPanel && (
           <button
             onClick={() => navigate('/write')}
-            className="text-sm bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:opacity-90 transition-colors"
+            className="text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-colors font-medium"
           >
             + 새 일기
           </button>
         )}
       </div>
 
-      <div className="mb-4">
+      <div className="mb-5">
         <input
           type="search"
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="검색..."
-          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card"
+          className="w-full border border-border rounded-xl px-4 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card"
         />
       </div>
 
@@ -424,7 +417,7 @@ export function HomePage() {
           )}
         </div>
       ) : (
-        <div className="space-y-3">
+        <div className="space-y-4 md:space-y-5">
           {displayed.map((entry) => (
             <EntryCard
               key={entry.id}

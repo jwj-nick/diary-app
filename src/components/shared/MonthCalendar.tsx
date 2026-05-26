@@ -117,7 +117,7 @@ export function MonthCalendar({
   }
 
   return (
-    <div className="flex flex-col w-full bg-card rounded-xl border border-border overflow-hidden">
+    <div className="flex flex-col w-full bg-card rounded-2xl border border-border overflow-hidden">
       {/* Header */}
       <div className="flex items-center justify-between px-3 md:px-4 py-3 border-b border-border">
         <div className="flex items-center gap-1">

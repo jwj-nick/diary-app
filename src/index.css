@@ -51,6 +51,16 @@
 @layer base {
   html, body {
     @apply bg-background text-foreground antialiased;
+    font-family:
+      'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont,
+      system-ui, 'Segoe UI', Roboto, 'Helvetica Neue', 'Apple SD Gothic Neo',
+      'Noto Sans KR', sans-serif;
+    font-feature-settings: 'ss03', 'ss04', 'tnum';
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+  }
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
   }
   /* Smooth chrome transitions when toggling theme */
   * {
