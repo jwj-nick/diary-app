@@ -14,6 +14,7 @@ import type { DiaryEntry, EntryType } from '@/types/diary'
 import { getEntryShortTitle } from '@/types/diary'
 import { exportToJSON } from '@/lib/export'
 import { cn } from '@/lib/utils'
+import { getUserAccent } from '@/lib/user-colors'
 
 interface Props {
   onClose?: () => void
@@ -36,7 +37,7 @@ function TypeDot({ type }: { type: EntryType }) {
 export function Sidebar({ onClose }: Props) {
   const navigate = useNavigate()
   const { entries, filterType, setFilterType } = useDiaryStore()
-  const { profile, viewMode, viewAsUserId, setViewMode, signOut } = useAuthStore()
+  const { profile, allProfiles, viewMode, viewAsUserId, setViewMode, signOut } = useAuthStore()
   const { theme, setTheme } = useTheme()
   const canWrite = !viewAsUserId
   const [libraryOpen, setLibraryOpen] = useState(true)
@@ -229,6 +230,46 @@ export function Sidebar({ onClose }: Props) {
           <span>삭제됨</span>
           <span className="ml-auto text-xs text-muted-foreground">{trashed.length}</span>
         </button>
+
+        {/* 가족 멤버 (Family Journal 핵심) */}
+        {allProfiles.length > 0 && (
+          <div className="mt-4">
+            <div className="px-2 mb-1">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">가족</span>
+            </div>
+            <div className="space-y-0.5">
+              {[...allProfiles]
+                .sort((a, b) => {
+                  // admin 먼저, 그다음 created_at 순
+                  if (a.role === 'admin' && b.role !== 'admin') return -1
+                  if (a.role !== 'admin' && b.role === 'admin') return 1
+                  return a.created_at.localeCompare(b.created_at)
+                })
+                .map((member) => {
+                  const accent = getUserAccent(member.id, allProfiles)
+                  const isMe = member.id === profile?.id
+                  const memberEntries = active.filter((e) => e.userId === member.id).length
+                  return (
+                    <div
+                      key={member.id}
+                      className="w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm"
+                    >
+                      <span className={cn('inline-block w-2 h-2 rounded-full flex-shrink-0', accent.dotClass)} />
+                      <span className="text-base leading-none">{member.avatar_emoji ?? '🙂'}</span>
+                      <span className={cn(
+                        'text-foreground truncate',
+                        isMe && 'font-medium'
+                      )}>
+                        {member.name}
+                        {isMe && <span className="text-muted-foreground text-[10px] ml-1">(나)</span>}
+                      </span>
+                      <span className="ml-auto text-xs text-muted-foreground">{memberEntries}</span>
+                    </div>
+                  )
+                })}
+            </div>
+          </div>
+        )}
 
         {/* Recent */}
         {recentEntries.length > 0 && (

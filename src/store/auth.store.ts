@@ -54,7 +54,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
           fetchProfile(user.id)
             .then((profile) => {
               set({ user, profile, authLoading: false })
-              if (profile?.role === 'admin') get().fetchAllProfiles()
+              // 모든 사용자가 다른 가족 프로필을 알아야 함
+              // (accent 색, 가족 멤버 리스트, 가족 공유 항목 작성자 표시).
+              // RLS가 못 읽게 막으면 graceful degradation.
+              get().fetchAllProfiles()
             })
             .catch(() => set({ user, profile: null, authLoading: false }))
         }, 0)

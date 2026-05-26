@@ -7,6 +7,9 @@ import { useAuthStore } from '@/store/auth.store'
 import type { DiaryEntry, EntryType } from '@/types/diary'
 import { getEntryShortTitle } from '@/types/diary'
 import { cn } from '@/lib/utils'
+import { getUserAccent } from '@/lib/user-colors'
+import { TodayPanel } from '@/components/shared/TodayPanel'
+import type { Profile } from '@/types/auth'
 
 const TYPE_LABEL: Record<EntryType, string> = {
   study: '공부',
@@ -38,17 +41,46 @@ function TypeBadge({ type }: { type: EntryType }) {
   )
 }
 
-function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: boolean; canWrite: boolean }) {
+function EntryCard({
+  entry,
+  isTrash,
+  canWrite,
+  allProfiles,
+  currentUserId,
+}: {
+  entry: DiaryEntry
+  isTrash: boolean
+  canWrite: boolean
+  allProfiles: Profile[]
+  currentUserId?: string
+}) {
   const navigate = useNavigate()
   const { softDelete, restore, permanentDelete, toggleStep } = useDiaryStore()
   const title = getEntryShortTitle(entry)
+  const accent = getUserAccent(entry.userId, allProfiles)
+  const author = allProfiles.find((p) => p.id === entry.userId)
+  const isMine = entry.userId === currentUserId
 
   return (
-    <div className="bg-card rounded-xl border border-border p-4 hover:shadow-sm transition-shadow">
+    <div
+      className={cn(
+        'bg-card rounded-xl border border-border p-4',
+        'border-l-4',
+        accent.borderClass,
+        'hover:-translate-y-0.5 hover:shadow-md transition-all duration-150'
+      )}
+    >
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <TypeBadge type={entry.type} />
+            {/* 작성자 표시 — 본인이 아닐 때만 (가족 공유 글 또는 admin 뷰) */}
+            {author && !isMine && (
+              <span className="inline-flex items-center gap-1 text-[10px] font-medium text-muted-foreground">
+                <span className={cn('inline-block w-1.5 h-1.5 rounded-full', accent.dotClass)} />
+                {author.avatar_emoji} {author.name}
+              </span>
+            )}
             {entry.visibility === 'family' && entry.type !== 'anniversary' && (
               <span className="inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
                 <Users className="h-2.5 w-2.5" />가족
@@ -269,8 +301,9 @@ function ProgressBar({ done, total, color }: { done: number; total: number; colo
 export function HomePage() {
   const navigate = useNavigate()
   const { entries, loading, filterType, searchQuery, loadEntries, setSearchQuery } = useDiaryStore()
-  const { viewMode, viewAsUserId } = useAuthStore()
+  const { viewMode, viewAsUserId, user, profile, allProfiles } = useAuthStore()
   const canWrite = !viewAsUserId
+  const currentUserId = viewAsUserId ?? user?.id
 
   useEffect(() => {
     loadEntries()
@@ -336,11 +369,26 @@ export function HomePage() {
     )
   }
 
+  // Today panel은 "모든 항목" 뷰 + 검색 안 할 때만
+  const showTodayPanel = filterType === 'all' && !searchQuery.trim() && !isTrash
+
   return (
     <div className="max-w-2xl mx-auto">
+      {showTodayPanel && (
+        <TodayPanel
+          entries={entries}
+          greetingName={profile?.name}
+        />
+      )}
+
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
-        {!isTrash && canWrite && (
+        <h1 className={cn(
+          'font-semibold text-foreground',
+          showTodayPanel ? 'text-base text-muted-foreground' : 'text-lg'
+        )}>
+          {showTodayPanel ? '최근 기록' : pageTitle}
+        </h1>
+        {!isTrash && canWrite && !showTodayPanel && (
           <button
             onClick={() => navigate('/write')}
             className="text-sm bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:opacity-90 transition-colors"
@@ -378,7 +426,14 @@ export function HomePage() {
       ) : (
         <div className="space-y-3">
           {displayed.map((entry) => (
-            <EntryCard key={entry.id} entry={entry} isTrash={isTrash} canWrite={canWrite} />
+            <EntryCard
+              key={entry.id}
+              entry={entry}
+              isTrash={isTrash}
+              canWrite={canWrite}
+              allProfiles={allProfiles}
+              currentUserId={currentUserId}
+            />
           ))}
         </div>
       )}
