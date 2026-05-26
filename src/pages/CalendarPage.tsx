@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { format, isSameDay, differenceInCalendarDays } from 'date-fns'
+import { format, isSameDay, differenceInCalendarDays, startOfMonth } from 'date-fns'
 import { ko } from 'date-fns/locale'
 import { Plus, Trash2, Pencil } from 'lucide-react'
 import { useDiaryStore } from '@/store/diary.store'
@@ -8,7 +8,17 @@ import { useAuthStore } from '@/store/auth.store'
 import type { DiaryEntry, EntryType } from '@/types/diary'
 import { getEntryDisplayDate, getEntryShortTitle } from '@/types/diary'
 import { MonthCalendar } from '@/components/shared/MonthCalendar'
+import { MultiMonthCalendar } from '@/components/shared/MultiMonthCalendar'
 import { cn } from '@/lib/utils'
+
+type ViewMode = '1' | '3' | '6' | '12'
+
+const VIEW_TABS: { id: ViewMode; label: string }[] = [
+  { id: '1', label: '월' },
+  { id: '3', label: '3개월' },
+  { id: '6', label: '6개월' },
+  { id: '12', label: '1년' },
+]
 
 const TYPE_LABEL: Record<EntryType, string> = {
   study: '공부',
@@ -39,6 +49,7 @@ export function CalendarPage() {
   const canWrite = !viewAsUserId
   const [currentMonth, setCurrentMonth] = useState(new Date())
   const [selectedDate, setSelectedDate] = useState(new Date())
+  const [viewModeTab, setViewModeTab] = useState<ViewMode>('1')
 
   useEffect(() => {
     loadEntries()
@@ -54,16 +65,55 @@ export function CalendarPage() {
     [activeEntries, selectedDate]
   )
 
+  // 멀티월 뷰의 시작 월: 현재 월 기준
+  const multiStart = useMemo(() => startOfMonth(currentMonth), [currentMonth])
+  const monthCount = viewModeTab === '3' ? 3 : viewModeTab === '6' ? 6 : viewModeTab === '12' ? 12 : 1
+
   return (
     <div className="h-full flex flex-col gap-4 max-w-6xl mx-auto">
-      {/* Legend */}
-      <div className="flex items-center flex-wrap gap-3 text-xs text-muted-foreground">
-        {(['study', 'reading', 'free', 'goal', 'exam', 'schedule', 'todo', 'anniversary'] as EntryType[]).map((t) => (
-          <span key={t} className="flex items-center gap-1">
-            <span className={cn('w-2 h-2 rounded-full inline-block', TYPE_DOT[t])} />
-            {TYPE_LABEL[t]}
-          </span>
-        ))}
+      {/* View toggle */}
+      <div className="flex items-center gap-2 flex-wrap">
+        <div className="inline-flex gap-1 bg-muted p-1 rounded-xl">
+          {VIEW_TABS.map(({ id, label }) => (
+            <button
+              key={id}
+              onClick={() => setViewModeTab(id)}
+              className={cn(
+                'px-3 py-1.5 rounded-lg text-xs font-medium transition-all',
+                viewModeTab === id
+                  ? 'bg-card shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
+              )}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+        {viewModeTab !== '1' && (
+          <div className="flex items-center gap-1">
+            <button
+              onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() - monthCount, 1))}
+              className="px-2 py-1 text-xs rounded-md border border-border hover:bg-muted text-muted-foreground"
+            >
+              ‹
+            </button>
+            <span className="text-xs text-muted-foreground px-2">
+              {format(multiStart, 'yyyy.M', { locale: ko })} ~ {format(new Date(multiStart.getFullYear(), multiStart.getMonth() + monthCount - 1, 1), 'yyyy.M', { locale: ko })}
+            </span>
+            <button
+              onClick={() => setCurrentMonth(new Date(currentMonth.getFullYear(), currentMonth.getMonth() + monthCount, 1))}
+              className="px-2 py-1 text-xs rounded-md border border-border hover:bg-muted text-muted-foreground"
+            >
+              ›
+            </button>
+            <button
+              onClick={() => setCurrentMonth(new Date())}
+              className="px-2 py-1 text-xs rounded-md border border-border hover:bg-muted text-muted-foreground ml-1"
+            >
+              오늘
+            </button>
+          </div>
+        )}
         <div className="ml-auto" />
         {canWrite && (
           <button
@@ -76,15 +126,47 @@ export function CalendarPage() {
         )}
       </div>
 
+      {/* Legend */}
+      <div className="flex items-center flex-wrap gap-3 text-xs text-muted-foreground">
+        {viewModeTab === '12'
+          ? (['exam', 'goal', 'anniversary'] as EntryType[]).map((t) => (
+              <span key={t} className="flex items-center gap-1">
+                <span className={cn('w-2 h-2 rounded-full inline-block', TYPE_DOT[t])} />
+                {TYPE_LABEL[t]}
+              </span>
+            ))
+          : (['study', 'reading', 'free', 'goal', 'exam', 'schedule', 'todo', 'anniversary'] as EntryType[]).map((t) => (
+              <span key={t} className="flex items-center gap-1">
+                <span className={cn('w-2 h-2 rounded-full inline-block', TYPE_DOT[t])} />
+                {TYPE_LABEL[t]}
+              </span>
+            ))}
+        {viewModeTab === '12' && (
+          <span className="text-[10px] text-muted-foreground/70">(1년 뷰는 시험·목표·기념일만 표시)</span>
+        )}
+      </div>
+
       {/* Calendar */}
-      <MonthCalendar
-        currentMonth={currentMonth}
-        setCurrentMonth={setCurrentMonth}
-        selectedDate={selectedDate}
-        setSelectedDate={setSelectedDate}
-        entries={activeEntries}
-        onAddOnDate={canWrite ? (date) => navigate(`/write?date=${format(date, 'yyyy-MM-dd')}`) : undefined}
-      />
+      {viewModeTab === '1' ? (
+        <MonthCalendar
+          currentMonth={currentMonth}
+          setCurrentMonth={setCurrentMonth}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          entries={activeEntries}
+          onAddOnDate={canWrite ? (date) => navigate(`/write?date=${format(date, 'yyyy-MM-dd')}`) : undefined}
+        />
+      ) : (
+        <MultiMonthCalendar
+          startMonth={multiStart}
+          monthCount={monthCount as 3 | 6 | 12}
+          entries={activeEntries}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          onAddOnDate={canWrite ? (date) => navigate(`/write?date=${format(date, 'yyyy-MM-dd')}`) : undefined}
+          planningOnly={viewModeTab === '12'}
+        />
+      )}
 
       {/* Selected day detail */}
       <div className="bg-card rounded-xl border border-border p-4">

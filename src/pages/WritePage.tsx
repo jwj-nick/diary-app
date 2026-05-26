@@ -12,18 +12,49 @@ import { TodoForm } from '@/features/todo/TodoForm'
 import { AnniversaryForm } from '@/features/anniversary/AnniversaryForm'
 import { cn } from '@/lib/utils'
 
-type Tab = 'study' | 'reading' | 'free' | 'goal' | 'exam' | 'schedule' | 'todo' | 'anniversary'
+type TopTab = 'study' | 'record' | 'target' | 'event' | 'todo'
+type SubType =
+  | 'study'
+  | 'reading'
+  | 'free'
+  | 'goal'
+  | 'exam'
+  | 'schedule'
+  | 'anniversary'
+  | 'todo'
 
-const TABS: { id: Tab; label: string; emoji: string }[] = [
+const TOP_TABS: { id: TopTab; label: string; emoji: string }[] = [
   { id: 'study', label: '공부', emoji: '📚' },
-  { id: 'reading', label: '독서', emoji: '📖' },
-  { id: 'free', label: '자유', emoji: '✏️' },
-  { id: 'schedule', label: '일정', emoji: '📅' },
+  { id: 'record', label: '기록', emoji: '📖' },
+  { id: 'target', label: '목표', emoji: '🎯' },
+  { id: 'event', label: '일정', emoji: '📅' },
   { id: 'todo', label: '할일', emoji: '☑️' },
-  { id: 'goal', label: '목표', emoji: '🎯' },
-  { id: 'exam', label: '시험', emoji: '📝' },
-  { id: 'anniversary', label: '기념일', emoji: '🎂' },
 ]
+
+const SUB_TABS: Record<TopTab, { id: SubType; label: string; emoji: string }[]> = {
+  study: [{ id: 'study', label: '공부', emoji: '📚' }],
+  record: [
+    { id: 'reading', label: '독서', emoji: '📖' },
+    { id: 'free', label: '자유', emoji: '✏️' },
+  ],
+  target: [
+    { id: 'goal', label: '목표', emoji: '🎯' },
+    { id: 'exam', label: '시험', emoji: '📝' },
+  ],
+  event: [
+    { id: 'schedule', label: '일정', emoji: '📅' },
+    { id: 'anniversary', label: '기념일', emoji: '🎂' },
+  ],
+  todo: [{ id: 'todo', label: '할일', emoji: '☑️' }],
+}
+
+function getTopFromSub(t: SubType): TopTab {
+  if (t === 'study') return 'study'
+  if (t === 'reading' || t === 'free') return 'record'
+  if (t === 'goal' || t === 'exam') return 'target'
+  if (t === 'schedule' || t === 'anniversary') return 'event'
+  return 'todo'
+}
 
 export function WritePage() {
   const navigate = useNavigate()
@@ -36,9 +67,20 @@ export function WritePage() {
   const isEdit = !!editEntry
   const defaultDate = params.get('date') ?? undefined
 
-  const initialTab: Tab =
-    editEntry?.type ?? (params.get('type') as Tab | null) ?? 'study'
-  const [activeTab, setActiveTab] = useState<Tab>(initialTab)
+  // 초기 sub-type: edit 모드면 entry.type, 아니면 URL의 type 파라미터, 아니면 'study'
+  const queryType = params.get('type') as SubType | null
+  const initialSub: SubType = (editEntry?.type ?? queryType ?? 'study') as SubType
+  const initialTop: TopTab = getTopFromSub(initialSub)
+
+  const [activeTop, setActiveTop] = useState<TopTab>(initialTop)
+  const [activeSub, setActiveSub] = useState<SubType>(initialSub)
+
+  const handleTopChange = (top: TopTab) => {
+    setActiveTop(top)
+    // 그룹 첫 sub로 자동 전환 (단일 그룹이면 그대로)
+    const firstSub = SUB_TABS[top][0].id
+    setActiveSub(firstSub)
+  }
 
   if (viewAsUserId) {
     return (
@@ -72,6 +114,9 @@ export function WritePage() {
   const handleSuccess = () => navigate(-1)
   const handleCancel = () => navigate(-1)
 
+  const subTabs = SUB_TABS[activeTop]
+  const showSubTabs = !isEdit && subTabs.length > 1
+
   return (
     <div className="max-w-xl mx-auto">
       <h1 className="text-lg font-semibold text-foreground mb-4">
@@ -79,27 +124,53 @@ export function WritePage() {
       </h1>
 
       {!isEdit && (
-        <div className="flex gap-1 bg-muted p-1 rounded-xl mb-6 overflow-x-auto scrollbar-none">
-          {TABS.map(({ id, label, emoji }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={cn(
-                'flex-shrink-0 flex items-center justify-center gap-1 py-2 px-3 rounded-lg text-sm font-medium transition-all',
-                activeTab === id
-                  ? 'bg-card shadow-sm text-foreground'
-                  : 'text-muted-foreground hover:text-foreground'
-              )}
-            >
-              <span>{emoji}</span>
-              <span className="hidden sm:inline">{label}</span>
-            </button>
-          ))}
-        </div>
+        <>
+          {/* Top 5-tab — 한 줄에 들어감 */}
+          <div className="flex gap-1 bg-muted p-1 rounded-xl mb-3">
+            {TOP_TABS.map(({ id, label, emoji }) => (
+              <button
+                key={id}
+                onClick={() => handleTopChange(id)}
+                className={cn(
+                  'flex-1 flex items-center justify-center gap-1 py-2 px-2 rounded-lg text-sm font-medium transition-all',
+                  activeTop === id
+                    ? 'bg-card shadow-sm text-foreground'
+                    : 'text-muted-foreground hover:text-foreground'
+                )}
+              >
+                <span>{emoji}</span>
+                <span className="hidden xs:inline sm:inline">{label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Sub-tab pill — 2개 이상일 때만 (record/target/event) */}
+          {showSubTabs && (
+            <div className="flex gap-2 mb-6">
+              {subTabs.map(({ id, label, emoji }) => (
+                <button
+                  key={id}
+                  onClick={() => setActiveSub(id)}
+                  className={cn(
+                    'flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-all',
+                    activeSub === id
+                      ? 'bg-primary text-primary-foreground border-primary'
+                      : 'bg-card text-muted-foreground border-border hover:text-foreground'
+                  )}
+                >
+                  <span>{emoji}</span>
+                  <span>{label}</span>
+                </button>
+              ))}
+            </div>
+          )}
+
+          {!showSubTabs && <div className="mb-6" />}
+        </>
       )}
 
       <div className="bg-card rounded-xl border border-border p-5">
-        {activeTab === 'study' && (
+        {activeSub === 'study' && (
           <StudyLogForm
             entry={editEntry?.type === 'study' ? editEntry : undefined}
             defaultDate={defaultDate}
@@ -107,7 +178,7 @@ export function WritePage() {
             onCancel={handleCancel}
           />
         )}
-        {activeTab === 'reading' && (
+        {activeSub === 'reading' && (
           <ReadingLogForm
             entry={editEntry?.type === 'reading' ? editEntry : undefined}
             defaultDate={defaultDate}
@@ -115,7 +186,7 @@ export function WritePage() {
             onCancel={handleCancel}
           />
         )}
-        {activeTab === 'free' && (
+        {activeSub === 'free' && (
           <FreeDiaryForm
             entry={editEntry?.type === 'free' ? editEntry : undefined}
             defaultDate={defaultDate}
@@ -123,7 +194,7 @@ export function WritePage() {
             onCancel={handleCancel}
           />
         )}
-        {activeTab === 'goal' && (
+        {activeSub === 'goal' && (
           <GoalForm
             entry={editEntry?.type === 'goal' ? editEntry : undefined}
             defaultDate={defaultDate}
@@ -131,7 +202,7 @@ export function WritePage() {
             onCancel={handleCancel}
           />
         )}
-        {activeTab === 'exam' && (
+        {activeSub === 'exam' && (
           <ExamForm
             entry={editEntry?.type === 'exam' ? editEntry : undefined}
             defaultDate={defaultDate}
@@ -139,21 +210,21 @@ export function WritePage() {
             onCancel={handleCancel}
           />
         )}
-        {activeTab === 'schedule' && (
+        {activeSub === 'schedule' && (
           <ScheduleForm
             entry={editEntry?.type === 'schedule' ? editEntry : undefined}
             defaultDate={defaultDate}
             onSaved={handleSuccess}
           />
         )}
-        {activeTab === 'todo' && (
+        {activeSub === 'todo' && (
           <TodoForm
             entry={editEntry?.type === 'todo' ? editEntry : undefined}
             defaultDate={defaultDate}
             onSaved={handleSuccess}
           />
         )}
-        {activeTab === 'anniversary' && (
+        {activeSub === 'anniversary' && (
           <AnniversaryForm
             entry={editEntry?.type === 'anniversary' ? editEntry : undefined}
             defaultDate={defaultDate}
