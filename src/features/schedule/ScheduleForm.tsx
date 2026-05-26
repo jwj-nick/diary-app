@@ -9,9 +9,10 @@ import type { ScheduleEntry } from '@/types/diary'
 interface Props {
   onSaved?: () => void
   entry?: ScheduleEntry
+  defaultDate?: string
 }
 
-export function ScheduleForm({ onSaved, entry }: Props) {
+export function ScheduleForm({ onSaved, entry, defaultDate }: Props) {
   const { addEntry, updateEntry } = useDiaryStore()
   const isEdit = !!entry
 
@@ -29,7 +30,7 @@ export function ScheduleForm({ onSaved, entry }: Props) {
           note: entry.note ?? '',
         }
       : {
-          startDate: format(new Date(), 'yyyy-MM-dd'),
+          startDate: defaultDate ?? format(new Date(), 'yyyy-MM-dd'),
           allDay: true,
         },
   })

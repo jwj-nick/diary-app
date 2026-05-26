@@ -84,6 +84,17 @@ export function Sidebar({ onClose }: Props) {
         </div>
       </div>
 
+      {/* Calendar shortcut (above the New Entry button per Nick's request) */}
+      <div className="px-3 pt-3">
+        <button
+          onClick={() => handleNavClick('/calendar')}
+          className="w-full flex items-center justify-center gap-2 bg-white text-zinc-700 border border-zinc-200 rounded-lg py-2 text-sm font-medium hover:bg-zinc-50 transition-colors"
+        >
+          <Calendar className="h-4 w-4" />
+          캘린더
+        </button>
+      </div>
+
       {/* New Entry Button */}
       <div className="px-3 py-3">
         <button
@@ -226,12 +237,6 @@ export function Sidebar({ onClose }: Props) {
 
       {/* Bottom: nav + user */}
       <div className="border-t border-zinc-100 px-2 py-2 space-y-0.5">
-        <button
-          onClick={() => handleNavClick('/calendar')}
-          className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-sm hover:bg-zinc-50 text-zinc-600 transition-colors"
-        >
-          <Calendar className="h-4 w-4" />캘린더
-        </button>
         <button
           onClick={() => exportToJSON()}
           className="w-full flex items-center gap-2 px-2 py-2 rounded-md text-sm hover:bg-zinc-50 text-zinc-600 transition-colors"

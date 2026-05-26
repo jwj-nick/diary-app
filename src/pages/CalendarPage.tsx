@@ -81,7 +81,7 @@ export function CalendarPage() {
         selectedDate={selectedDate}
         setSelectedDate={setSelectedDate}
         entries={activeEntries}
-        onAddOnDate={canWrite ? () => navigate('/write') : undefined}
+        onAddOnDate={canWrite ? (date) => navigate(`/write?date=${format(date, 'yyyy-MM-dd')}`) : undefined}
       />
 
       {/* Selected day detail */}

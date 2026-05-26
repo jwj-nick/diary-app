@@ -13,9 +13,10 @@ interface Props {
   onSuccess: () => void
   onCancel: () => void
   entry?: StudyGoalEntry
+  defaultDate?: string
 }
 
-export function GoalForm({ onSuccess, onCancel, entry }: Props) {
+export function GoalForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
   const { addEntry, updateEntry } = useDiaryStore()
   const isEdit = !!entry
 
@@ -35,7 +36,7 @@ export function GoalForm({ onSuccess, onCancel, entry }: Props) {
           steps: entry.steps.map((s) => ({ id: s.id, text: s.text })),
         }
       : {
-          targetDate: format(addDays(new Date(), 7), 'yyyy-MM-dd'),
+          targetDate: defaultDate ?? format(addDays(new Date(), 7), 'yyyy-MM-dd'),
           steps: [{ text: '' }, { text: '' }, { text: '' }],
         },
   })

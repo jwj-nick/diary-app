@@ -32,6 +32,7 @@ export function WritePage() {
 
   const editEntry = editId ? entries.find((e) => e.id === editId) : undefined
   const isEdit = !!editEntry
+  const defaultDate = params.get('date') ?? undefined
 
   const initialTab: Tab =
     editEntry?.type ?? (params.get('type') as Tab | null) ?? 'study'
@@ -99,6 +100,7 @@ export function WritePage() {
         {activeTab === 'study' && (
           <StudyLogForm
             entry={editEntry?.type === 'study' ? editEntry : undefined}
+            defaultDate={defaultDate}
             onSuccess={handleSuccess}
             onCancel={handleCancel}
           />
@@ -106,6 +108,7 @@ export function WritePage() {
         {activeTab === 'reading' && (
           <ReadingLogForm
             entry={editEntry?.type === 'reading' ? editEntry : undefined}
+            defaultDate={defaultDate}
             onSuccess={handleSuccess}
             onCancel={handleCancel}
           />
@@ -113,6 +116,7 @@ export function WritePage() {
         {activeTab === 'free' && (
           <FreeDiaryForm
             entry={editEntry?.type === 'free' ? editEntry : undefined}
+            defaultDate={defaultDate}
             onSuccess={handleSuccess}
             onCancel={handleCancel}
           />
@@ -120,6 +124,7 @@ export function WritePage() {
         {activeTab === 'goal' && (
           <GoalForm
             entry={editEntry?.type === 'goal' ? editEntry : undefined}
+            defaultDate={defaultDate}
             onSuccess={handleSuccess}
             onCancel={handleCancel}
           />
@@ -127,6 +132,7 @@ export function WritePage() {
         {activeTab === 'exam' && (
           <ExamForm
             entry={editEntry?.type === 'exam' ? editEntry : undefined}
+            defaultDate={defaultDate}
             onSuccess={handleSuccess}
             onCancel={handleCancel}
           />
@@ -134,12 +140,14 @@ export function WritePage() {
         {activeTab === 'schedule' && (
           <ScheduleForm
             entry={editEntry?.type === 'schedule' ? editEntry : undefined}
+            defaultDate={defaultDate}
             onSaved={handleSuccess}
           />
         )}
         {activeTab === 'todo' && (
           <TodoForm
             entry={editEntry?.type === 'todo' ? editEntry : undefined}
+            defaultDate={defaultDate}
             onSaved={handleSuccess}
           />
         )}

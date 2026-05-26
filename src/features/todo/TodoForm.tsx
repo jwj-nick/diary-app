@@ -11,11 +11,12 @@ import type { TodoEntry, TodoItem } from '@/types/diary'
 interface Props {
   onSaved?: () => void
   entry?: TodoEntry
+  defaultDate?: string
 }
 
 type FormItem = { id?: string; text: string }
 
-export function TodoForm({ onSaved, entry }: Props) {
+export function TodoForm({ onSaved, entry, defaultDate }: Props) {
   const { addEntry, updateEntry } = useDiaryStore()
   const isEdit = !!entry
 
@@ -28,7 +29,7 @@ export function TodoForm({ onSaved, entry }: Props) {
     resolver: zodResolver(todoSchema),
     defaultValues: entry
       ? { title: entry.title, dueDate: entry.dueDate ?? '', items: initialItems }
-      : { dueDate: format(new Date(), 'yyyy-MM-dd'), items: initialItems },
+      : { dueDate: defaultDate ?? format(new Date(), 'yyyy-MM-dd'), items: initialItems },
   })
 
   const syncItems = (items: FormItem[]) => {

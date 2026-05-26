@@ -12,9 +12,10 @@ interface Props {
   onSuccess: () => void
   onCancel: () => void
   entry?: ReadingEntry
+  defaultDate?: string
 }
 
-export function ReadingLogForm({ onSuccess, onCancel, entry }: Props) {
+export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
   const { addEntry, updateEntry } = useDiaryStore()
   const isEdit = !!entry
   const [hoverRating, setHoverRating] = useState(0)
@@ -39,7 +40,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry }: Props) {
           rating: entry.rating,
         }
       : {
-          date: format(new Date(), 'yyyy-MM-dd'),
+          date: defaultDate ?? format(new Date(), 'yyyy-MM-dd'),
         },
   })
 

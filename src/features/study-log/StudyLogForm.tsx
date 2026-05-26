@@ -33,9 +33,10 @@ interface Props {
   onSuccess: () => void
   onCancel: () => void
   entry?: StudyEntry
+  defaultDate?: string
 }
 
-export function StudyLogForm({ onSuccess, onCancel, entry }: Props) {
+export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
   const { addEntry, updateEntry } = useDiaryStore()
   const isEdit = !!entry
 
@@ -65,7 +66,7 @@ export function StudyLogForm({ onSuccess, onCancel, entry }: Props) {
           questions: entry.questions ?? '',
         }
       : {
-          date: format(new Date(), 'yyyy-MM-dd'),
+          date: defaultDate ?? format(new Date(), 'yyyy-MM-dd'),
           understanding: 3,
           durationMinutes: 30,
         },

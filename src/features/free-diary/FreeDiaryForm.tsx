@@ -10,9 +10,10 @@ interface Props {
   onSuccess: () => void
   onCancel: () => void
   entry?: FreeDiaryEntry
+  defaultDate?: string
 }
 
-export function FreeDiaryForm({ onSuccess, onCancel, entry }: Props) {
+export function FreeDiaryForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
   const { addEntry, updateEntry } = useDiaryStore()
   const isEdit = !!entry
 
@@ -24,7 +25,7 @@ export function FreeDiaryForm({ onSuccess, onCancel, entry }: Props) {
     resolver: zodResolver(freeDiarySchema),
     defaultValues: entry
       ? { date: entry.date, title: entry.title ?? '', body: entry.body }
-      : { date: format(new Date(), 'yyyy-MM-dd') },
+      : { date: defaultDate ?? format(new Date(), 'yyyy-MM-dd') },
   })
 
   const onSubmit = async (data: FreeDiaryFormData) => {

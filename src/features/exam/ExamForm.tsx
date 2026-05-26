@@ -20,9 +20,10 @@ interface Props {
   onSuccess: () => void
   onCancel: () => void
   entry?: ExamEntry
+  defaultDate?: string
 }
 
-export function ExamForm({ onSuccess, onCancel, entry }: Props) {
+export function ExamForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
   const { addEntry, updateEntry } = useDiaryStore()
   const isEdit = !!entry
 
@@ -47,7 +48,7 @@ export function ExamForm({ onSuccess, onCancel, entry }: Props) {
           })),
         }
       : {
-          examDate: format(addDays(new Date(), 14), 'yyyy-MM-dd'),
+          examDate: defaultDate ?? format(addDays(new Date(), 14), 'yyyy-MM-dd'),
           examKind: 'performance',
           prepSteps: [{ text: '', dueDate: '' }, { text: '', dueDate: '' }],
         },
