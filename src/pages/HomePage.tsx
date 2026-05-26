@@ -1,7 +1,7 @@
 import { useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { format, differenceInCalendarDays } from 'date-fns'
-import { Trash2, RotateCcw, X, Pencil, Target, FileText, CalendarClock, CheckSquare } from 'lucide-react'
+import { Trash2, RotateCcw, X, Pencil, Target, FileText, CalendarClock, CheckSquare, Cake, Users } from 'lucide-react'
 import { useDiaryStore } from '@/store/diary.store'
 import { useAuthStore } from '@/store/auth.store'
 import type { DiaryEntry, EntryType } from '@/types/diary'
@@ -16,16 +16,18 @@ const TYPE_LABEL: Record<EntryType, string> = {
   exam: '시험',
   schedule: '일정',
   todo: '할일',
+  anniversary: '기념일',
 }
 
 const TYPE_BADGE: Record<EntryType, string> = {
-  study: 'bg-blue-500/15    text-blue-700 dark:text-blue-300',
+  study: 'bg-blue-500/15 text-blue-700 dark:text-blue-300',
   reading: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
-  free: 'bg-amber-500/15   text-amber-700 dark:text-amber-300',
-  goal: 'bg-violet-500/15  text-violet-700 dark:text-violet-300',
-  exam: 'bg-rose-500/15    text-rose-700 dark:text-rose-300',
-  schedule: 'bg-sky-500/15     text-sky-700 dark:text-sky-300',
-  todo: 'bg-orange-500/15  text-orange-700 dark:text-orange-300',
+  free: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
+  goal: 'bg-violet-500/15 text-violet-700 dark:text-violet-300',
+  exam: 'bg-rose-500/15 text-rose-700 dark:text-rose-300',
+  schedule: 'bg-sky-500/15 text-sky-700 dark:text-sky-300',
+  todo: 'bg-orange-500/15 text-orange-700 dark:text-orange-300',
+  anniversary: 'bg-pink-500/15 text-pink-700 dark:text-pink-300',
 }
 
 function TypeBadge({ type }: { type: EntryType }) {
@@ -47,6 +49,11 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <TypeBadge type={entry.type} />
+            {entry.visibility === 'family' && entry.type !== 'anniversary' && (
+              <span className="inline-flex items-center gap-0.5 text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-muted text-muted-foreground">
+                <Users className="h-2.5 w-2.5" />가족
+              </span>
+            )}
             <span className="text-xs text-muted-foreground">
               {entry.type === 'goal'
                 ? `목표 ~${format(new Date(entry.targetDate), 'M/d')}`
@@ -56,6 +63,8 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
                 ? format(new Date(entry.startDate), 'M/d (EEE)')
                 : entry.type === 'todo' && entry.dueDate
                 ? `기한 ${format(new Date(entry.dueDate), 'M/d')}`
+                : entry.type === 'anniversary'
+                ? format(new Date(entry.anniversaryDate), 'M월 d일') + (entry.recurring ? ' · 매년' : '')
                 : format(new Date(entry.date), 'yyyy년 M월 d일')}
             </span>
             {entry.type === 'study' && (
@@ -73,6 +82,7 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
             {entry.type === 'exam' && <FileText className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-rose-500" />}
             {entry.type === 'schedule' && <CalendarClock className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-sky-500" />}
             {entry.type === 'todo' && <CheckSquare className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-orange-500" />}
+            {entry.type === 'anniversary' && <Cake className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-pink-500" />}
             {title}
           </h3>
 
@@ -273,6 +283,8 @@ export function HomePage() {
     if (!isTrash && filterType !== 'all') {
       if (filterType === 'planning') {
         list = list.filter((e) => e.type === 'goal' || e.type === 'exam')
+      } else if (filterType === 'family') {
+        list = list.filter((e) => e.visibility === 'family')
       } else {
         list = list.filter((e) => e.type === (filterType as EntryType))
       }
@@ -289,6 +301,7 @@ export function HomePage() {
         if (e.type === 'exam') return `${e.title} ${e.subject} ${e.scope ?? ''}`.toLowerCase().includes(q)
         if (e.type === 'schedule') return `${e.title} ${e.location ?? ''} ${e.note ?? ''}`.toLowerCase().includes(q)
         if (e.type === 'todo') return `${e.title} ${e.items.map((i) => i.text).join(' ')}`.toLowerCase().includes(q)
+        if (e.type === 'anniversary') return `${e.title} ${e.description ?? ''}`.toLowerCase().includes(q)
         return false
       })
     }
@@ -313,7 +326,7 @@ export function HomePage() {
   const PAGE_TITLE: Record<string, string> = {
     all: '모든 항목', study: '공부 일기', reading: '독서 일기', free: '자유 일기',
     goal: '목표', exam: '시험 / 수행평가', schedule: '일정 / 약속', todo: '할일',
-    planning: '목표 & 시험', trash: '삭제됨',
+    anniversary: '기념일', planning: '목표 & 시험', family: '가족 공동', trash: '삭제됨',
   }
   const pageTitle = PAGE_TITLE[filterType] ?? '모든 항목'
 

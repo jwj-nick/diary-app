@@ -4,7 +4,7 @@ import * as Collapsible from '@radix-ui/react-collapsible'
 import {
   ChevronDown, ChevronRight, Calendar, Download, PenLine,
   Target, FileText, CalendarClock, CheckSquare, LogOut, ShieldCheck, User,
-  Sun, Moon, Monitor,
+  Sun, Moon, Monitor, Cake, Users,
 } from 'lucide-react'
 import { format } from 'date-fns'
 import { useDiaryStore } from '@/store/diary.store'
@@ -28,6 +28,7 @@ function TypeDot({ type }: { type: EntryType }) {
     exam: 'bg-rose-500',
     schedule: 'bg-sky-500',
     todo: 'bg-orange-500',
+    anniversary: 'bg-pink-500',
   }
   return <span className={cn('inline-block w-2 h-2 rounded-full flex-shrink-0', colors[type])} />
 }
@@ -52,9 +53,11 @@ export function Sidebar({ onClose }: Props) {
     exam: active.filter((e) => e.type === 'exam').length,
     schedule: active.filter((e) => e.type === 'schedule').length,
     todo: active.filter((e) => e.type === 'todo').length,
+    anniversary: active.filter((e) => e.type === 'anniversary').length,
   }
   const journalCount = counts.study + counts.reading + counts.free
-  const planningCount = counts.goal + counts.exam + counts.schedule + counts.todo
+  const planningCount = counts.goal + counts.exam + counts.schedule + counts.todo + counts.anniversary
+  const familyCount = active.filter((e) => e.visibility === 'family').length
 
   const recentEntries = [...active]
     .filter((e) => e.type !== 'goal' && e.type !== 'exam')
@@ -182,6 +185,7 @@ export function Sidebar({ onClose }: Props) {
                 { type: 'exam', label: '시험 / 수행평가', icon: FileText, color: 'text-rose-500', count: counts.exam },
                 { type: 'schedule', label: '일정 / 약속', icon: CalendarClock, color: 'text-sky-500', count: counts.schedule },
                 { type: 'todo', label: '할일', icon: CheckSquare, color: 'text-orange-500', count: counts.todo },
+                { type: 'anniversary', label: '기념일', icon: Cake, color: 'text-pink-500', count: counts.anniversary },
               ] as const).map(({ type, label, icon: Icon, color, count }) => (
                 <button
                   key={type}
@@ -200,11 +204,24 @@ export function Sidebar({ onClose }: Props) {
           </Collapsible.Content>
         </Collapsible.Root>
 
+        {/* Family-shared filter */}
+        <button
+          onClick={() => handleFilterClick('family')}
+          className={cn(
+            'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors mt-3',
+            filterType === 'family' ? 'bg-muted text-foreground font-medium' : 'hover:bg-muted text-muted-foreground'
+          )}
+        >
+          <Users className="h-3.5 w-3.5 text-pink-500" />
+          <span>가족 공동</span>
+          <span className="ml-auto text-xs text-muted-foreground">{familyCount}</span>
+        </button>
+
         {/* Trash */}
         <button
           onClick={() => handleFilterClick('trash')}
           className={cn(
-            'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors mt-3',
+            'w-full flex items-center gap-2 px-2 py-1.5 rounded-md text-sm transition-colors mt-1',
             filterType === 'trash' ? 'bg-muted text-foreground font-medium' : 'hover:bg-muted text-muted-foreground'
           )}
         >

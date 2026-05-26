@@ -9,9 +9,10 @@ import { GoalForm } from '@/features/study-goal/GoalForm'
 import { ExamForm } from '@/features/exam/ExamForm'
 import { ScheduleForm } from '@/features/schedule/ScheduleForm'
 import { TodoForm } from '@/features/todo/TodoForm'
+import { AnniversaryForm } from '@/features/anniversary/AnniversaryForm'
 import { cn } from '@/lib/utils'
 
-type Tab = 'study' | 'reading' | 'free' | 'goal' | 'exam' | 'schedule' | 'todo'
+type Tab = 'study' | 'reading' | 'free' | 'goal' | 'exam' | 'schedule' | 'todo' | 'anniversary'
 
 const TABS: { id: Tab; label: string; emoji: string }[] = [
   { id: 'study', label: '공부', emoji: '📚' },
@@ -21,6 +22,7 @@ const TABS: { id: Tab; label: string; emoji: string }[] = [
   { id: 'todo', label: '할일', emoji: '☑️' },
   { id: 'goal', label: '목표', emoji: '🎯' },
   { id: 'exam', label: '시험', emoji: '📝' },
+  { id: 'anniversary', label: '기념일', emoji: '🎂' },
 ]
 
 export function WritePage() {
@@ -147,6 +149,13 @@ export function WritePage() {
         {activeTab === 'todo' && (
           <TodoForm
             entry={editEntry?.type === 'todo' ? editEntry : undefined}
+            defaultDate={defaultDate}
+            onSaved={handleSuccess}
+          />
+        )}
+        {activeTab === 'anniversary' && (
+          <AnniversaryForm
+            entry={editEntry?.type === 'anniversary' ? editEntry : undefined}
             defaultDate={defaultDate}
             onSaved={handleSuccess}
           />

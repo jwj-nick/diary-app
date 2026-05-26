@@ -1,8 +1,8 @@
 import { supabase } from './supabase'
-import type { DiaryEntry } from '@/types/diary'
+import type { DiaryEntry, Visibility } from '@/types/diary'
 
 function rowToEntry(row: Record<string, unknown>): DiaryEntry {
-  const { id, type, date, created_at, updated_at, deleted_at, tags, data } = row
+  const { id, user_id, type, date, created_at, updated_at, deleted_at, tags, visibility, data } = row
   return {
     id: id as string,
     type: type as DiaryEntry['type'],
@@ -11,12 +11,14 @@ function rowToEntry(row: Record<string, unknown>): DiaryEntry {
     updatedAt: updated_at as string,
     ...(deleted_at ? { deletedAt: deleted_at as string } : {}),
     tags: (tags as string[] | null) ?? [],
+    userId: user_id as string | undefined,
+    visibility: (visibility as Visibility | null) ?? 'personal',
     ...(data as object),
   } as DiaryEntry
 }
 
 function entryToRow(entry: DiaryEntry, userId: string) {
-  const { id, type, date, createdAt, updatedAt, deletedAt, tags, ...data } = entry
+  const { id, type, date, createdAt, updatedAt, deletedAt, tags, userId: _ownerId, visibility, ...data } = entry
   return {
     id,
     user_id: userId,
@@ -26,6 +28,7 @@ function entryToRow(entry: DiaryEntry, userId: string) {
     updated_at: updatedAt,
     deleted_at: deletedAt ?? null,
     tags: tags ?? [],
+    visibility: visibility ?? 'personal',
     data,
   }
 }
@@ -33,7 +36,9 @@ function entryToRow(entry: DiaryEntry, userId: string) {
 export async function getAllEntries(userId: string, viewAll = false): Promise<DiaryEntry[]> {
   let query = supabase.from('diary_entries').select('*')
   if (!viewAll) {
-    query = query.eq('user_id', userId)
+    // RLS already includes family-shared rows; user_id filter would exclude them.
+    // So when viewing personally, fetch own + family-visible.
+    query = query.or(`user_id.eq.${userId},visibility.eq.family`)
   }
   const { data, error } = await query.order('date', { ascending: false })
   if (error) {

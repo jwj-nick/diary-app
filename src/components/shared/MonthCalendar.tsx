@@ -27,6 +27,7 @@ const TYPE_DOT: Record<EntryType, string> = {
   exam: 'bg-rose-500',
   schedule: 'bg-sky-500',
   todo: 'bg-orange-500',
+  anniversary: 'bg-pink-500',
 }
 
 const TYPE_BG: Record<EntryType, string> = {
@@ -37,6 +38,7 @@ const TYPE_BG: Record<EntryType, string> = {
   exam: 'bg-rose-500/20    text-rose-700 dark:text-rose-300   border-rose-500/25 font-medium',
   schedule: 'bg-sky-500/15     text-sky-700 dark:text-sky-300     border-sky-500/20',
   todo: 'bg-orange-500/15  text-orange-700 dark:text-orange-300 border-orange-500/20',
+  anniversary: 'bg-pink-500/15 text-pink-700 dark:text-pink-300 border-pink-500/20 font-medium',
 }
 
 const TYPE_EMOJI: Record<EntryType, string> = {
@@ -47,6 +49,7 @@ const TYPE_EMOJI: Record<EntryType, string> = {
   exam: '📝',
   schedule: '📅',
   todo: '☑️',
+  anniversary: '🎂',
 }
 
 interface Props {
@@ -72,7 +75,8 @@ export function MonthCalendar({
     return eachDayOfInterval({ start, end })
   }, [currentMonth])
 
-  // Group entries by display date
+  // Group entries by display date. Recurring anniversaries also appear on the
+  // same month-day in adjacent years so users see "엄마 생일" in 2026, 2027, etc.
   const entriesByDate = useMemo(() => {
     const map = new Map<string, DiaryEntry[]>()
     for (const entry of entries) {
@@ -80,6 +84,18 @@ export function MonthCalendar({
       const key = getEntryDisplayDate(entry)
       if (!map.has(key)) map.set(key, [])
       map.get(key)!.push(entry)
+      if (entry.type === 'anniversary' && entry.recurring) {
+        const [origY, m, d] = key.split('-').map(Number)
+        if (origY && m && d) {
+          for (const yearOffset of [-1, 0, 1, 2]) {
+            const y = origY + yearOffset
+            if (y === origY) continue
+            const projected = `${y}-${String(m).padStart(2, '0')}-${String(d).padStart(2, '0')}`
+            if (!map.has(projected)) map.set(projected, [])
+            map.get(projected)!.push(entry)
+          }
+        }
+      }
     }
     return map
   }, [entries])
@@ -200,7 +216,7 @@ function DayCell({
 }: DayCellProps) {
   // Sort entries: exam > goal > others
   const sorted = useMemo(() => {
-    const priority: Record<EntryType, number> = { exam: 0, goal: 1, schedule: 2, todo: 3, study: 4, reading: 5, free: 6 }
+    const priority: Record<EntryType, number> = { anniversary: 0, exam: 1, goal: 2, schedule: 3, todo: 4, study: 5, reading: 6, free: 7 }
     return [...entries].sort((a, b) => priority[a.type] - priority[b.type])
   }, [entries])
 

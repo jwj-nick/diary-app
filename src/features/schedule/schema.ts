@@ -9,6 +9,7 @@ export const scheduleSchema = z.object({
   allDay: z.boolean(),
   location: z.string().optional(),
   note: z.string().optional(),
+  visibility: z.enum(['personal', 'family']),
 })
 
 export type ScheduleFormData = z.infer<typeof scheduleSchema>

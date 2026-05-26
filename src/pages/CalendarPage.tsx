@@ -18,6 +18,7 @@ const TYPE_LABEL: Record<EntryType, string> = {
   exam: '시험',
   schedule: '일정',
   todo: '할일',
+  anniversary: '기념일',
 }
 
 const TYPE_DOT: Record<EntryType, string> = {
@@ -28,6 +29,7 @@ const TYPE_DOT: Record<EntryType, string> = {
   exam: 'bg-rose-500',
   schedule: 'bg-sky-500',
   todo: 'bg-orange-500',
+  anniversary: 'bg-pink-500',
 }
 
 export function CalendarPage() {
@@ -56,7 +58,7 @@ export function CalendarPage() {
     <div className="h-full flex flex-col gap-4 max-w-6xl mx-auto">
       {/* Legend */}
       <div className="flex items-center flex-wrap gap-3 text-xs text-muted-foreground">
-        {(['study', 'reading', 'free', 'goal', 'exam', 'schedule', 'todo'] as EntryType[]).map((t) => (
+        {(['study', 'reading', 'free', 'goal', 'exam', 'schedule', 'todo', 'anniversary'] as EntryType[]).map((t) => (
           <span key={t} className="flex items-center gap-1">
             <span className={cn('w-2 h-2 rounded-full inline-block', TYPE_DOT[t])} />
             {TYPE_LABEL[t]}

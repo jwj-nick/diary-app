@@ -1,7 +1,8 @@
-export type EntryType = 'study' | 'reading' | 'free' | 'goal' | 'exam' | 'schedule' | 'todo'
+export type EntryType = 'study' | 'reading' | 'free' | 'goal' | 'exam' | 'schedule' | 'todo' | 'anniversary'
 export type Understanding = 1 | 2 | 3 | 4
 export type ExamKind = 'midterm' | 'final' | 'performance' | 'quiz' | 'other'
 export type GoalStatus = 'in_progress' | 'completed'
+export type Visibility = 'personal' | 'family'
 
 export interface BaseEntry {
   id: string
@@ -11,6 +12,10 @@ export interface BaseEntry {
   updatedAt: string
   deletedAt?: string
   tags?: string[]
+  /** Set by storage.ts from the DB column; safe to ignore when constructing on the client (server fills it) */
+  userId?: string
+  /** 'personal' = only owner+admin can see; 'family' = all family members can see. Default 'personal'. */
+  visibility?: Visibility
 }
 
 export interface StudyEntry extends BaseEntry {
@@ -103,6 +108,17 @@ export interface TodoEntry extends BaseEntry {
   completedAt?: string
 }
 
+export interface AnniversaryEntry extends BaseEntry {
+  type: 'anniversary'
+  title: string
+  /** Anniversary occurs on this date; recurring=true means it repeats yearly. */
+  anniversaryDate: string
+  recurring: boolean
+  description?: string
+  /** Anniversaries are always 'family' visibility. */
+  visibility: 'family'
+}
+
 export type DiaryEntry =
   | StudyEntry
   | ReadingEntry
@@ -111,11 +127,13 @@ export type DiaryEntry =
   | ExamEntry
   | ScheduleEntry
   | TodoEntry
+  | AnniversaryEntry
 
 export function getEntryDisplayDate(entry: DiaryEntry): string {
   if (entry.type === 'goal') return entry.targetDate
   if (entry.type === 'exam') return entry.examDate
   if (entry.type === 'schedule') return entry.startDate
+  if (entry.type === 'anniversary') return entry.anniversaryDate
   return entry.date
 }
 
@@ -132,5 +150,6 @@ export function getEntryShortTitle(entry: DiaryEntry): string {
     case 'exam': return entry.title
     case 'schedule': return entry.title
     case 'todo': return entry.title
+    case 'anniversary': return entry.title
   }
 }

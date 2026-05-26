@@ -3,7 +3,7 @@ import type { DiaryEntry, EntryType } from '@/types/diary'
 import { getAllEntries, saveEntry, deleteEntry } from '@/lib/storage'
 import { useAuthStore } from './auth.store'
 
-type FilterType = EntryType | 'all' | 'trash' | 'planning'
+type FilterType = EntryType | 'all' | 'trash' | 'planning' | 'family'
 
 interface DiaryState {
   entries: DiaryEntry[]
