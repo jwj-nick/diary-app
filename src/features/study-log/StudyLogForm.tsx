@@ -113,7 +113,7 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Subject */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">과목</label>
+        <label className="block text-sm font-medium text-foreground mb-1">과목</label>
         <Controller
           name="subject"
           control={control}
@@ -125,18 +125,18 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
                 setShowCustomSubject(val === '직접입력')
               }}
             >
-              <Select.Trigger className="flex items-center justify-between w-full border rounded-lg px-3 py-2 text-sm bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <Select.Trigger className="flex items-center justify-between w-full border rounded-lg px-3 py-2 text-sm bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <Select.Value placeholder="과목을 선택해주세요" />
-                <Select.Icon><ChevronDown className="h-4 w-4 text-zinc-400" /></Select.Icon>
+                <Select.Icon><ChevronDown className="h-4 w-4 text-muted-foreground" /></Select.Icon>
               </Select.Trigger>
               <Select.Portal>
-                <Select.Content className="bg-white border rounded-lg shadow-lg z-50 overflow-hidden">
+                <Select.Content className="bg-card border rounded-lg shadow-lg z-50 overflow-hidden">
                   <Select.Viewport className="p-1">
                     {SUBJECTS.map((s) => (
                       <Select.Item
                         key={s}
                         value={s}
-                        className="flex items-center px-3 py-2 text-sm rounded cursor-pointer hover:bg-zinc-100 focus:bg-zinc-100 outline-none"
+                        className="flex items-center px-3 py-2 text-sm rounded cursor-pointer hover:bg-muted focus:bg-muted outline-none"
                       >
                         <Select.ItemText>{s}</Select.ItemText>
                       </Select.Item>
@@ -159,7 +159,7 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
 
       {/* Topic */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">단원 / 주제</label>
+        <label className="block text-sm font-medium text-foreground mb-1">단원 / 주제</label>
         <input
           {...register('topic')}
           placeholder="예: 2차 방정식, 광합성, 조선 건국..."
@@ -170,7 +170,7 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
 
       {/* Duration */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">공부 시간</label>
+        <label className="block text-sm font-medium text-foreground mb-1">공부 시간</label>
         <Controller
           name="durationMinutes"
           control={control}
@@ -188,18 +188,18 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
                 }
               }}
             >
-              <Select.Trigger className="flex items-center justify-between w-full border rounded-lg px-3 py-2 text-sm bg-white hover:bg-zinc-50 focus:outline-none focus:ring-2 focus:ring-blue-500">
+              <Select.Trigger className="flex items-center justify-between w-full border rounded-lg px-3 py-2 text-sm bg-card hover:bg-muted focus:outline-none focus:ring-2 focus:ring-blue-500">
                 <Select.Value placeholder="공부 시간 선택" />
-                <Select.Icon><ChevronDown className="h-4 w-4 text-zinc-400" /></Select.Icon>
+                <Select.Icon><ChevronDown className="h-4 w-4 text-muted-foreground" /></Select.Icon>
               </Select.Trigger>
               <Select.Portal>
-                <Select.Content className="bg-white border rounded-lg shadow-lg z-50 overflow-hidden">
+                <Select.Content className="bg-card border rounded-lg shadow-lg z-50 overflow-hidden">
                   <Select.Viewport className="p-1">
                     {DURATIONS.map((d) => (
                       <Select.Item
                         key={d.value}
                         value={String(d.value)}
-                        className="flex items-center px-3 py-2 text-sm rounded cursor-pointer hover:bg-zinc-100 focus:bg-zinc-100 outline-none"
+                        className="flex items-center px-3 py-2 text-sm rounded cursor-pointer hover:bg-muted focus:bg-muted outline-none"
                       >
                         <Select.ItemText>{d.label}</Select.ItemText>
                       </Select.Item>
@@ -223,7 +223,7 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
 
       {/* Understanding */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">이해도</label>
+        <label className="block text-sm font-medium text-foreground mb-2">이해도</label>
         <div className="flex gap-2">
           {UNDERSTANDING_EMOJIS.map(({ value, emoji, label }) => (
             <button
@@ -233,12 +233,12 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
               className={cn(
                 'flex flex-col items-center gap-1 px-3 py-2 rounded-xl border-2 transition-all',
                 understanding === value
-                  ? 'border-blue-500 bg-blue-50 scale-105'
-                  : 'border-zinc-200 hover:border-zinc-300 hover:bg-zinc-50'
+                  ? 'border-blue-500 bg-blue-500/10 scale-105'
+                  : 'border-border hover:border-input hover:bg-muted'
               )}
             >
               <span className="text-2xl">{emoji}</span>
-              <span className="text-xs text-zinc-600">{label}</span>
+              <span className="text-xs text-muted-foreground">{label}</span>
             </button>
           ))}
         </div>
@@ -246,7 +246,7 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
 
       {/* Date */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">날짜</label>
+        <label className="block text-sm font-medium text-foreground mb-1">날짜</label>
         <input
           type="date"
           {...register('date')}
@@ -256,7 +256,7 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
 
       {/* Note */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">메모 (선택)</label>
+        <label className="block text-sm font-medium text-foreground mb-1">메모 (선택)</label>
         <textarea
           {...register('note')}
           rows={3}
@@ -267,7 +267,7 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
 
       {/* Questions */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">궁금한 점 (선택)</label>
+        <label className="block text-sm font-medium text-foreground mb-1">궁금한 점 (선택)</label>
         <textarea
           {...register('questions')}
           rows={2}
@@ -281,7 +281,7 @@ export function StudyLogForm({ onSuccess, onCancel, entry, defaultDate }: Props)
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 border border-zinc-300 rounded-lg py-2 text-sm font-medium hover:bg-zinc-50 transition-colors"
+          className="flex-1 border border-input rounded-lg py-2 text-sm font-medium hover:bg-muted transition-colors"
         >
           취소
         </button>

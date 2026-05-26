@@ -52,8 +52,8 @@ export function AdminPage() {
   if (myProfile?.role !== 'admin') {
     return (
       <div className="flex flex-col items-center justify-center h-60 gap-3">
-        <ShieldCheck className="h-10 w-10 text-zinc-300" />
-        <p className="text-zinc-500 text-sm">관리자만 접근할 수 있습니다.</p>
+        <ShieldCheck className="h-10 w-10 text-muted-foreground/60" />
+        <p className="text-muted-foreground text-sm">관리자만 접근할 수 있습니다.</p>
       </div>
     )
   }
@@ -105,10 +105,10 @@ export function AdminPage() {
     <div className="max-w-2xl mx-auto space-y-4 pb-4">
       {/* Header */}
       <div className="flex items-center gap-3">
-        <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500">
+        <button onClick={() => navigate(-1)} className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground">
           <ArrowLeft className="h-4 w-4" />
         </button>
-        <h1 className="text-lg font-bold text-zinc-900 flex items-center gap-2">
+        <h1 className="text-lg font-bold text-foreground flex items-center gap-2">
           <ShieldCheck className="h-5 w-5 text-violet-500" />관리자 대시보드
         </h1>
       </div>
@@ -116,12 +116,12 @@ export function AdminPage() {
       {/* View mode + viewing as banner */}
       <div className={cn(
         'rounded-2xl border p-4',
-        viewMode === 'admin' ? 'bg-violet-50 border-violet-200' : 'bg-white border-zinc-200'
+        viewMode === 'admin' ? 'bg-violet-500/10  border-violet-500/20' : 'bg-card border-border'
       )}>
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-zinc-800">관리자 모드</p>
-            <p className="text-xs text-zinc-500 mt-0.5">
+            <p className="text-sm font-semibold text-foreground">관리자 모드</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
               {viewAsUserId && viewingAs
                 ? `${viewingAs.avatar_emoji} ${viewingAs.name} 의 항목 보는 중`
                 : viewMode === 'admin'
@@ -133,7 +133,7 @@ export function AdminPage() {
             {viewAsUserId && (
               <button
                 onClick={() => setViewAsUser(null)}
-                className="text-xs px-2.5 py-1 rounded-lg bg-violet-100 text-violet-700 font-medium"
+                className="text-xs px-2.5 py-1 rounded-lg bg-violet-500/15  text-violet-700 dark:text-violet-300 font-medium"
               >
                 전체 보기로
               </button>
@@ -142,11 +142,11 @@ export function AdminPage() {
               onClick={() => { setViewMode(viewMode === 'admin' ? 'personal' : 'admin'); setViewAsUser(null) }}
               className={cn(
                 'relative inline-flex h-6 w-11 items-center rounded-full transition-colors',
-                viewMode === 'admin' ? 'bg-violet-600' : 'bg-zinc-200'
+                viewMode === 'admin' ? 'bg-violet-600' : 'bg-muted'
               )}
             >
               <span className={cn(
-                'inline-block h-4 w-4 transform rounded-full bg-white transition-transform shadow',
+                'inline-block h-4 w-4 transform rounded-full bg-card transition-transform shadow',
                 viewMode === 'admin' ? 'translate-x-6' : 'translate-x-1'
               )} />
             </button>
@@ -155,8 +155,8 @@ export function AdminPage() {
       </div>
 
       {/* Family members */}
-      <div className="bg-white rounded-2xl border border-zinc-200 p-4">
-        <p className="text-sm font-semibold text-zinc-700 mb-3 flex items-center gap-2">
+      <div className="bg-card rounded-2xl border border-border p-4">
+        <p className="text-sm font-semibold text-foreground mb-3 flex items-center gap-2">
           <Users className="h-4 w-4" />가족 구성원 관리
         </p>
         <div className="space-y-3">
@@ -165,7 +165,7 @@ export function AdminPage() {
               key={p.id}
               className={cn(
                 'border rounded-xl p-3 transition-colors',
-                viewAsUserId === p.id ? 'border-violet-300 bg-violet-50' : 'border-zinc-100'
+                viewAsUserId === p.id ? 'border-violet-500/40 bg-violet-500/10' : 'border-border'
               )}
             >
               {editingUserId === p.id ? (
@@ -178,7 +178,7 @@ export function AdminPage() {
                         onClick={() => setEditAvatar(emoji)}
                         className={cn(
                           'text-xl w-8 h-8 rounded-lg flex items-center justify-center',
-                          editAvatar === emoji ? 'bg-zinc-900 scale-110' : 'bg-zinc-50 hover:bg-zinc-100'
+                          editAvatar === emoji ? 'bg-primary scale-110' : 'bg-muted hover:bg-muted'
                         )}
                       >{emoji}</button>
                     ))}
@@ -187,13 +187,13 @@ export function AdminPage() {
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     placeholder="이름"
-                    className="w-full border border-zinc-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400"
+                    className="w-full border border-input rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                   />
                   {p.role !== 'admin' && (
                     <select
                       value={editGrade}
                       onChange={(e) => setEditGrade(e.target.value)}
-                      className="w-full border border-zinc-300 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-400"
+                      className="w-full border border-input rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
                     >
                       {GRADE_OPTIONS.map((o) => (
                         <option key={o.value} value={o.value}>{o.label}</option>
@@ -204,13 +204,13 @@ export function AdminPage() {
                     <button
                       onClick={saveEdit}
                       disabled={saving}
-                      className="flex items-center gap-1 px-3 py-1 bg-zinc-900 text-white rounded-lg text-xs font-medium"
+                      className="flex items-center gap-1 px-3 py-1 bg-primary text-white rounded-lg text-xs font-medium"
                     >
                       <Check className="h-3 w-3" />{saving ? '저장 중...' : '저장'}
                     </button>
                     <button
                       onClick={cancelEdit}
-                      className="flex items-center gap-1 px-3 py-1 bg-zinc-100 text-zinc-600 rounded-lg text-xs"
+                      className="flex items-center gap-1 px-3 py-1 bg-muted text-muted-foreground rounded-lg text-xs"
                     >
                       <X className="h-3 w-3" />취소
                     </button>
@@ -222,15 +222,15 @@ export function AdminPage() {
                   <span className="text-2xl">{p.avatar_emoji ?? '🙂'}</span>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
-                      <span className="text-sm font-semibold text-zinc-800">{p.name}</span>
+                      <span className="text-sm font-semibold text-foreground">{p.name}</span>
                       <span className={cn(
                         'text-[10px] px-1.5 py-0.5 rounded-full font-medium',
-                        p.role === 'admin' ? 'bg-violet-100 text-violet-700' : 'bg-zinc-100 text-zinc-600'
+                        p.role === 'admin' ? 'bg-violet-500/15  text-violet-700 dark:text-violet-300' : 'bg-muted text-muted-foreground'
                       )}>
                         {p.role === 'admin' ? '관리자' : GRADE_OPTIONS.find((o) => o.value === p.grade)?.label ?? '사용자'}
                       </span>
                     </div>
-                    <p className="text-xs text-zinc-400 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {active.filter((e) => (e as { user_id?: string }).user_id === p.id || true).length > 0
                         ? `항목 ${active.length}개 (전체 기준)`
                         : '항목 없음'}
@@ -243,8 +243,8 @@ export function AdminPage() {
                       className={cn(
                         'p-1.5 rounded-lg text-xs flex items-center gap-1 transition-colors',
                         viewAsUserId === p.id
-                          ? 'bg-violet-100 text-violet-700'
-                          : 'hover:bg-zinc-100 text-zinc-400'
+                          ? 'bg-violet-500/15  text-violet-700 dark:text-violet-300'
+                          : 'hover:bg-muted text-muted-foreground'
                       )}
                     >
                       <Eye className="h-3.5 w-3.5" />
@@ -252,7 +252,7 @@ export function AdminPage() {
                     <button
                       onClick={() => startEdit(p)}
                       title="프로필 편집"
-                      className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400"
+                      className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
                     >
                       <Pencil className="h-3.5 w-3.5" />
                     </button>
@@ -265,51 +265,51 @@ export function AdminPage() {
       </div>
 
       {/* Stats */}
-      <div className="bg-white rounded-2xl border border-zinc-200 p-4">
-        <p className="text-sm font-semibold text-zinc-700 mb-3">
+      <div className="bg-card rounded-2xl border border-border p-4">
+        <p className="text-sm font-semibold text-foreground mb-3">
           현황 {viewingAs ? `— ${viewingAs.name}` : viewMode === 'admin' ? '— 전체' : '— 내 항목'}
         </p>
         <div className="grid grid-cols-3 gap-3 text-center mb-4">
           <div>
-            <p className="text-2xl font-bold text-zinc-900">{active.length}</p>
-            <p className="text-xs text-zinc-500">활성</p>
+            <p className="text-2xl font-bold text-foreground">{active.length}</p>
+            <p className="text-xs text-muted-foreground">활성</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-zinc-900">{trashed.length}</p>
-            <p className="text-xs text-zinc-500">삭제됨</p>
+            <p className="text-2xl font-bold text-foreground">{trashed.length}</p>
+            <p className="text-xs text-muted-foreground">삭제됨</p>
           </div>
           <div>
-            <p className="text-2xl font-bold text-zinc-900">
+            <p className="text-2xl font-bold text-foreground">
               {active.filter((e) => e.date === today).length}
             </p>
-            <p className="text-xs text-zinc-500">오늘</p>
+            <p className="text-xs text-muted-foreground">오늘</p>
           </div>
         </div>
 
         <div className="space-y-2">
           {Object.entries(typeCounts).map(([type, count]) => (
             <div key={type} className="flex items-center gap-2">
-              <span className={cn('w-2 h-2 rounded-full flex-shrink-0', typeColors[type] ?? 'bg-zinc-300')} />
-              <span className="text-xs text-zinc-600 w-14">{typeLabels[type] ?? type}</span>
-              <div className="flex-1 bg-zinc-100 rounded-full h-1.5">
+              <span className={cn('w-2 h-2 rounded-full flex-shrink-0', typeColors[type] ?? 'bg-muted')} />
+              <span className="text-xs text-muted-foreground w-14">{typeLabels[type] ?? type}</span>
+              <div className="flex-1 bg-muted rounded-full h-1.5">
                 <div
-                  className={cn('h-1.5 rounded-full', typeColors[type] ?? 'bg-zinc-400')}
+                  className={cn('h-1.5 rounded-full', typeColors[type] ?? 'bg-muted-foreground')}
                   style={{ width: `${active.length ? (count / active.length) * 100 : 0}%` }}
                 />
               </div>
-              <span className="text-xs text-zinc-400 w-6 text-right">{count}</span>
+              <span className="text-xs text-muted-foreground w-6 text-right">{count}</span>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="bg-zinc-50 rounded-2xl border border-zinc-200 p-4">
-        <p className="text-xs text-zinc-500 leading-relaxed">
+      <div className="bg-muted rounded-2xl border border-border p-4">
+        <p className="text-xs text-muted-foreground leading-relaxed">
           💡 <strong>👁 아이콘</strong>: 해당 가족 구성원의 시점으로 항목 확인<br />
           💡 <strong>✏️ 아이콘</strong>: 이름·학년·아바타 수정<br />
           💡 비밀번호 초기화: Supabase → Authentication → Users
         </p>
-        <p className="text-xs text-zinc-400 mt-2">
+        <p className="text-xs text-muted-foreground mt-2">
           마지막 로드: {format(new Date(), 'yyyy년 M월 d일 HH:mm', { locale: ko })}
         </p>
       </div>

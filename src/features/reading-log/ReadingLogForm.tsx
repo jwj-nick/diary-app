@@ -86,7 +86,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Book Title */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">책 제목</label>
+        <label className="block text-sm font-medium text-foreground mb-1">책 제목</label>
         <input
           {...register('bookTitle')}
           placeholder="읽은 책 제목을 입력해주세요"
@@ -97,7 +97,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
 
       {/* Author */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">저자 (선택)</label>
+        <label className="block text-sm font-medium text-foreground mb-1">저자 (선택)</label>
         <input
           {...register('author')}
           placeholder="저자 이름"
@@ -107,7 +107,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
 
       {/* Pages */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">읽은 페이지 (선택)</label>
+        <label className="block text-sm font-medium text-foreground mb-1">읽은 페이지 (선택)</label>
         <div className="flex items-center gap-2">
           <input
             type="number"
@@ -116,7 +116,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
             min={1}
             className="w-24 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
-          <span className="text-zinc-400 text-sm">~</span>
+          <span className="text-muted-foreground text-sm">~</span>
           <input
             type="number"
             {...register('pagesTo', { valueAsNumber: true })}
@@ -124,13 +124,13 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
             min={1}
             className="w-24 border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
-          <span className="text-zinc-500 text-sm">페이지</span>
+          <span className="text-muted-foreground text-sm">페이지</span>
         </div>
       </div>
 
       {/* Rating */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">별점 (선택)</label>
+        <label className="block text-sm font-medium text-foreground mb-2">별점 (선택)</label>
         <div className="flex gap-1">
           {[1, 2, 3, 4, 5].map((star) => (
             <button
@@ -142,7 +142,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
               className="text-2xl transition-transform hover:scale-110"
             >
               <span className={cn(
-                (hoverRating || rating || 0) >= star ? 'text-amber-400' : 'text-zinc-300'
+                (hoverRating || rating || 0) >= star ? 'text-amber-400' : 'text-muted-foreground/60'
               )}>
                 ★
               </span>
@@ -152,7 +152,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
             <button
               type="button"
               onClick={() => setValue('rating', undefined)}
-              className="ml-2 text-xs text-zinc-400 hover:text-zinc-600"
+              className="ml-2 text-xs text-muted-foreground hover:text-muted-foreground"
             >
               초기화
             </button>
@@ -162,7 +162,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
 
       {/* Quote */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">인상 구절 (선택)</label>
+        <label className="block text-sm font-medium text-foreground mb-1">인상 구절 (선택)</label>
         <textarea
           {...register('quote')}
           rows={3}
@@ -173,7 +173,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
 
       {/* Thought */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">느낀 점 (선택)</label>
+        <label className="block text-sm font-medium text-foreground mb-1">느낀 점 (선택)</label>
         <textarea
           {...register('thought')}
           rows={3}
@@ -184,7 +184,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
 
       {/* Date */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">날짜</label>
+        <label className="block text-sm font-medium text-foreground mb-1">날짜</label>
         <input
           type="date"
           {...register('date')}
@@ -197,7 +197,7 @@ export function ReadingLogForm({ onSuccess, onCancel, entry, defaultDate }: Prop
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 border border-zinc-300 rounded-lg py-2 text-sm font-medium hover:bg-zinc-50 transition-colors"
+          className="flex-1 border border-input rounded-lg py-2 text-sm font-medium hover:bg-muted transition-colors"
         >
           취소
         </button>

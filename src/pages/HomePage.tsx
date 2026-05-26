@@ -19,13 +19,13 @@ const TYPE_LABEL: Record<EntryType, string> = {
 }
 
 const TYPE_BADGE: Record<EntryType, string> = {
-  study: 'bg-blue-100 text-blue-700',
-  reading: 'bg-emerald-100 text-emerald-700',
-  free: 'bg-amber-100 text-amber-700',
-  goal: 'bg-violet-100 text-violet-700',
-  exam: 'bg-rose-100 text-rose-700',
-  schedule: 'bg-sky-100 text-sky-700',
-  todo: 'bg-orange-100 text-orange-700',
+  study: 'bg-blue-500/15    text-blue-700 dark:text-blue-300',
+  reading: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300',
+  free: 'bg-amber-500/15   text-amber-700 dark:text-amber-300',
+  goal: 'bg-violet-500/15  text-violet-700 dark:text-violet-300',
+  exam: 'bg-rose-500/15    text-rose-700 dark:text-rose-300',
+  schedule: 'bg-sky-500/15     text-sky-700 dark:text-sky-300',
+  todo: 'bg-orange-500/15  text-orange-700 dark:text-orange-300',
 }
 
 function TypeBadge({ type }: { type: EntryType }) {
@@ -42,12 +42,12 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
   const title = getEntryShortTitle(entry)
 
   return (
-    <div className="bg-white rounded-xl border border-zinc-200 p-4 hover:shadow-sm transition-shadow">
+    <div className="bg-card rounded-xl border border-border p-4 hover:shadow-sm transition-shadow">
       <div className="flex items-start justify-between gap-2">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1 flex-wrap">
             <TypeBadge type={entry.type} />
-            <span className="text-xs text-zinc-400">
+            <span className="text-xs text-muted-foreground">
               {entry.type === 'goal'
                 ? `목표 ~${format(new Date(entry.targetDate), 'M/d')}`
                 : entry.type === 'exam'
@@ -59,7 +59,7 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
                 : format(new Date(entry.date), 'yyyy년 M월 d일')}
             </span>
             {entry.type === 'study' && (
-              <span className="text-xs text-zinc-400">{entry.durationMinutes}분</span>
+              <span className="text-xs text-muted-foreground">{entry.durationMinutes}분</span>
             )}
             {entry.type === 'reading' && entry.rating && (
               <span className="text-xs text-amber-500">{'★'.repeat(entry.rating)}</span>
@@ -68,7 +68,7 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
               <CountdownBadge date={entry.type === 'goal' ? entry.targetDate : entry.examDate} />
             )}
           </div>
-          <h3 className="font-medium text-zinc-900 text-sm truncate mb-1">
+          <h3 className="font-medium text-foreground text-sm truncate mb-1">
             {entry.type === 'goal' && <Target className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-violet-500" />}
             {entry.type === 'exam' && <FileText className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-rose-500" />}
             {entry.type === 'schedule' && <CalendarClock className="inline h-3.5 w-3.5 mr-1 -mt-0.5 text-sky-500" />}
@@ -78,18 +78,18 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
 
           {/* Type-specific body */}
           {entry.type === 'study' && entry.note && (
-            <p className="text-xs text-zinc-500 line-clamp-2">{entry.note}</p>
+            <p className="text-xs text-muted-foreground line-clamp-2">{entry.note}</p>
           )}
           {entry.type === 'reading' && (entry.thought || entry.quote) && (
-            <p className="text-xs text-zinc-500 line-clamp-2">{entry.thought || entry.quote}</p>
+            <p className="text-xs text-muted-foreground line-clamp-2">{entry.thought || entry.quote}</p>
           )}
           {entry.type === 'free' && entry.body && (
-            <p className="text-xs text-zinc-500 line-clamp-2 whitespace-pre-wrap">
+            <p className="text-xs text-muted-foreground line-clamp-2 whitespace-pre-wrap">
               {entry.body.slice(0, 200)}
             </p>
           )}
           {entry.type === 'schedule' && (
-            <div className="text-xs text-zinc-500 space-y-0.5 mt-1">
+            <div className="text-xs text-muted-foreground space-y-0.5 mt-1">
               {!entry.allDay && entry.startTime && (
                 <p>🕐 {entry.startTime}{entry.endTime ? ` ~ ${entry.endTime}` : ''}</p>
               )}
@@ -107,26 +107,26 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
               <ul className="space-y-0.5 mt-1">
                 {entry.items.slice(0, 3).map((item) => (
                   <li key={item.id}>
-                    <label className="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer">
+                    <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
                       <input
                         type="checkbox"
                         checked={item.done}
                         onChange={() => toggleStep(entry.id, item.id)}
                         className="rounded text-orange-500 focus:ring-orange-400"
                       />
-                      <span className={cn(item.done && 'line-through text-zinc-400')}>{item.text}</span>
+                      <span className={cn(item.done && 'line-through text-muted-foreground')}>{item.text}</span>
                     </label>
                   </li>
                 ))}
                 {entry.items.length > 3 && (
-                  <p className="text-xs text-zinc-400 pl-5">+{entry.items.length - 3}개 더</p>
+                  <p className="text-xs text-muted-foreground pl-5">+{entry.items.length - 3}개 더</p>
                 )}
               </ul>
             </div>
           )}
           {entry.type === 'goal' && (
             <div className="mt-2 space-y-1.5">
-              {entry.description && <p className="text-xs text-zinc-500">{entry.description}</p>}
+              {entry.description && <p className="text-xs text-muted-foreground">{entry.description}</p>}
               {entry.steps.length > 0 && (
                 <>
                   <ProgressBar
@@ -137,14 +137,14 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
                   <ul className="space-y-0.5 mt-1">
                     {entry.steps.map((s) => (
                       <li key={s.id}>
-                        <label className="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer">
+                        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
                           <input
                             type="checkbox"
                             checked={s.done}
                             onChange={() => toggleStep(entry.id, s.id)}
                             className="rounded text-violet-600 focus:ring-violet-500"
                           />
-                          <span className={cn(s.done && 'line-through text-zinc-400')}>{s.text}</span>
+                          <span className={cn(s.done && 'line-through text-muted-foreground')}>{s.text}</span>
                         </label>
                       </li>
                     ))}
@@ -155,7 +155,7 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
           )}
           {entry.type === 'exam' && (
             <div className="mt-2 space-y-1.5">
-              {entry.scope && <p className="text-xs text-zinc-500">{entry.scope}</p>}
+              {entry.scope && <p className="text-xs text-muted-foreground">{entry.scope}</p>}
               {entry.prepSteps.length > 0 && (
                 <>
                   <ProgressBar
@@ -166,16 +166,16 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
                   <ul className="space-y-0.5 mt-1">
                     {entry.prepSteps.map((s) => (
                       <li key={s.id}>
-                        <label className="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer">
+                        <label className="flex items-center gap-2 text-xs text-muted-foreground cursor-pointer">
                           <input
                             type="checkbox"
                             checked={s.done}
                             onChange={() => toggleStep(entry.id, s.id)}
                             className="rounded text-rose-600 focus:ring-rose-500"
                           />
-                          <span className={cn(s.done && 'line-through text-zinc-400')}>{s.text}</span>
+                          <span className={cn(s.done && 'line-through text-muted-foreground')}>{s.text}</span>
                           {s.dueDate && !s.done && (
-                            <span className="text-[10px] text-zinc-400 ml-auto">
+                            <span className="text-[10px] text-muted-foreground ml-auto">
                               ~{format(new Date(s.dueDate), 'M/d')}
                             </span>
                           )}
@@ -195,14 +195,14 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
               <button
                 onClick={() => restore(entry.id)}
                 title="복원"
-                className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-500"
+                className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground"
               >
                 <RotateCcw className="h-3.5 w-3.5" />
               </button>
               <button
                 onClick={() => permanentDelete(entry.id)}
                 title="영구 삭제"
-                className="p-1.5 rounded-lg hover:bg-red-50 text-zinc-400 hover:text-red-600"
+                className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-600"
               >
                 <X className="h-3.5 w-3.5" />
               </button>
@@ -213,7 +213,7 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
                 <button
                   onClick={() => navigate(`/write?id=${entry.id}`)}
                   title="수정"
-                  className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400 hover:text-zinc-700"
+                  className="p-1.5 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground"
                 >
                   <Pencil className="h-3.5 w-3.5" />
                 </button>
@@ -222,7 +222,7 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
                 <button
                   onClick={() => softDelete(entry.id)}
                   title="삭제"
-                  className="p-1.5 rounded-lg hover:bg-red-50 text-zinc-400 hover:text-red-500"
+                  className="p-1.5 rounded-lg hover:bg-red-500/10 text-muted-foreground hover:text-red-500"
                 >
                   <Trash2 className="h-3.5 w-3.5" />
                 </button>
@@ -237,18 +237,18 @@ function EntryCard({ entry, isTrash, canWrite }: { entry: DiaryEntry; isTrash: b
 
 function CountdownBadge({ date }: { date: string }) {
   const days = differenceInCalendarDays(new Date(date), new Date())
-  if (days < 0) return <span className="text-xs text-zinc-400">지남</span>
+  if (days < 0) return <span className="text-xs text-muted-foreground">지남</span>
   if (days === 0) return <span className="text-xs font-medium text-rose-600">D-day</span>
   if (days <= 7) return <span className="text-xs font-medium text-amber-600">D-{days}</span>
-  return <span className="text-xs text-zinc-500">D-{days}</span>
+  return <span className="text-xs text-muted-foreground">D-{days}</span>
 }
 
 function ProgressBar({ done, total, color }: { done: number; total: number; color: 'violet' | 'rose' | 'orange' }) {
   const pct = total > 0 ? (done / total) * 100 : 0
   const barColor = color === 'violet' ? 'bg-violet-500' : color === 'rose' ? 'bg-rose-500' : 'bg-orange-500'
   return (
-    <div className="flex items-center gap-2 text-xs text-zinc-500">
-      <div className="flex-1 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+    <div className="flex items-center gap-2 text-xs text-muted-foreground">
+      <div className="flex-1 h-1.5 bg-muted rounded-full overflow-hidden">
         <div className={cn('h-full', barColor)} style={{ width: `${pct}%` }} />
       </div>
       <span>{done}/{total}</span>
@@ -319,18 +319,18 @@ export function HomePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-40 text-zinc-400 text-sm">불러오는 중...</div>
+      <div className="flex items-center justify-center h-40 text-muted-foreground text-sm">불러오는 중...</div>
     )
   }
 
   return (
     <div className="max-w-2xl mx-auto">
       <div className="flex items-center justify-between mb-4">
-        <h1 className="text-lg font-semibold text-zinc-900">{pageTitle}</h1>
+        <h1 className="text-lg font-semibold text-foreground">{pageTitle}</h1>
         {!isTrash && canWrite && (
           <button
             onClick={() => navigate('/write')}
-            className="text-sm bg-zinc-900 text-white px-3 py-1.5 rounded-lg hover:bg-zinc-700 transition-colors"
+            className="text-sm bg-primary text-primary-foreground px-3 py-1.5 rounded-lg hover:opacity-90 transition-colors"
           >
             + 새 일기
           </button>
@@ -343,12 +343,12 @@ export function HomePage() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="검색..."
-          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-300 bg-white"
+          className="w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring bg-card"
         />
       </div>
 
       {displayed.length === 0 ? (
-        <div className="text-center py-16 text-zinc-400">
+        <div className="text-center py-16 text-muted-foreground">
           <div className="text-4xl mb-3">{isTrash ? '🗑️' : '📝'}</div>
           <p className="text-sm">
             {searchQuery ? '검색 결과가 없어요' : isTrash ? '삭제된 일기가 없어요' : '아직 일기가 없어요. 첫 일기를 써볼까요?'}
@@ -356,7 +356,7 @@ export function HomePage() {
           {!isTrash && !searchQuery && canWrite && (
             <button
               onClick={() => navigate('/write')}
-              className="mt-4 text-sm bg-zinc-900 text-white px-4 py-2 rounded-lg hover:bg-zinc-700 transition-colors"
+              className="mt-4 text-sm bg-primary text-primary-foreground px-4 py-2 rounded-lg hover:opacity-90 transition-colors"
             >
               일기 쓰기
             </button>

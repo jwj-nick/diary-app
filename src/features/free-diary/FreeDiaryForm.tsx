@@ -78,7 +78,7 @@ export function FreeDiaryForm({ onSuccess, onCancel, entry, defaultDate }: Props
 
       {/* Date */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">날짜</label>
+        <label className="block text-sm font-medium text-foreground mb-1">날짜</label>
         <input
           type="date"
           {...register('date')}
@@ -91,7 +91,7 @@ export function FreeDiaryForm({ onSuccess, onCancel, entry, defaultDate }: Props
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 border border-zinc-300 rounded-lg py-2 text-sm font-medium hover:bg-zinc-50 transition-colors"
+          className="flex-1 border border-input rounded-lg py-2 text-sm font-medium hover:bg-muted transition-colors"
         >
           취소
         </button>

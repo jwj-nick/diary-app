@@ -30,13 +30,13 @@ const TYPE_DOT: Record<EntryType, string> = {
 }
 
 const TYPE_BG: Record<EntryType, string> = {
-  study: 'bg-blue-50 text-blue-700 border-blue-100',
-  reading: 'bg-emerald-50 text-emerald-700 border-emerald-100',
-  free: 'bg-amber-50 text-amber-700 border-amber-100',
-  goal: 'bg-violet-50 text-violet-700 border-violet-100',
-  exam: 'bg-rose-100 text-rose-700 border-rose-200 font-medium',
-  schedule: 'bg-sky-50 text-sky-700 border-sky-100',
-  todo: 'bg-orange-50 text-orange-700 border-orange-100',
+  study: 'bg-blue-500/15    text-blue-700 dark:text-blue-300   border-blue-500/20',
+  reading: 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border-emerald-500/20',
+  free: 'bg-amber-500/15   text-amber-700 dark:text-amber-300  border-amber-500/20',
+  goal: 'bg-violet-500/15  text-violet-700 dark:text-violet-300 border-violet-500/20',
+  exam: 'bg-rose-500/20    text-rose-700 dark:text-rose-300   border-rose-500/25 font-medium',
+  schedule: 'bg-sky-500/15     text-sky-700 dark:text-sky-300     border-sky-500/20',
+  todo: 'bg-orange-500/15  text-orange-700 dark:text-orange-300 border-orange-500/20',
 }
 
 const TYPE_EMOJI: Record<EntryType, string> = {
@@ -101,23 +101,23 @@ export function MonthCalendar({
   }
 
   return (
-    <div className="flex flex-col w-full bg-white rounded-xl border border-zinc-200 overflow-hidden">
+    <div className="flex flex-col w-full bg-card rounded-xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-3 md:px-4 py-3 border-b border-zinc-100">
+      <div className="flex items-center justify-between px-3 md:px-4 py-3 border-b border-border">
         <div className="flex items-center gap-1">
           <button
             onClick={goPrev}
-            className="p-1.5 rounded-md hover:bg-zinc-100 text-zinc-600"
+            className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"
             aria-label="이전 달"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
-          <h2 className="font-semibold text-zinc-900 px-2 text-sm md:text-base">
+          <h2 className="font-semibold text-foreground px-2 text-sm md:text-base">
             {format(currentMonth, 'yyyy년 M월', { locale: ko })}
           </h2>
           <button
             onClick={goNext}
-            className="p-1.5 rounded-md hover:bg-zinc-100 text-zinc-600"
+            className="p-1.5 rounded-md hover:bg-muted text-muted-foreground"
             aria-label="다음 달"
           >
             <ChevronRight className="h-4 w-4" />
@@ -125,14 +125,14 @@ export function MonthCalendar({
         </div>
         <button
           onClick={goToday}
-          className="text-xs px-2.5 py-1 rounded-md border border-zinc-200 hover:bg-zinc-50 text-zinc-600"
+          className="text-xs px-2.5 py-1 rounded-md border border-border hover:bg-muted text-muted-foreground"
         >
           오늘
         </button>
       </div>
 
       {/* Weekday header */}
-      <div className="grid grid-cols-7 border-b border-zinc-100">
+      <div className="grid grid-cols-7 border-b border-border">
         {WEEKDAYS.map((d, i) => (
           <div
             key={d}
@@ -140,7 +140,7 @@ export function MonthCalendar({
               'py-2 text-center text-[11px] md:text-xs font-medium',
               i === 0 && 'text-rose-500',
               i === 6 && 'text-blue-500',
-              i !== 0 && i !== 6 && 'text-zinc-500'
+              i !== 0 && i !== 6 && 'text-muted-foreground'
             )}
           >
             {d}
@@ -215,12 +215,12 @@ function DayCell({
       onDoubleClick={onDoubleClick}
       className={cn(
         'group relative flex flex-col gap-1 text-left',
-        'border-r border-b border-zinc-100 last:border-r-0',
+        'border-r border-b border-border last:border-r-0',
         'p-1 md:p-1.5 min-h-[64px] md:min-h-[100px] lg:min-h-[120px]',
         'transition-colors overflow-hidden',
-        !inMonth && 'bg-zinc-50/30 text-zinc-300',
-        inMonth && 'hover:bg-zinc-50',
-        selected && 'bg-blue-50 ring-2 ring-blue-300 ring-inset z-10'
+        !inMonth && 'bg-muted/30 text-muted-foreground/60',
+        inMonth && 'hover:bg-muted',
+        selected && 'bg-blue-500/15 ring-2 ring-blue-500/40 ring-inset z-10'
       )}
     >
       {/* Day number */}
@@ -229,10 +229,10 @@ function DayCell({
           className={cn(
             'text-[11px] md:text-xs font-medium leading-none',
             today &&
-              'inline-flex items-center justify-center w-5 h-5 md:w-6 md:h-6 rounded-full bg-zinc-900 text-white text-[10px] md:text-xs',
+              'inline-flex items-center justify-center w-5 h-5 md:w-6 md:h-6 rounded-full bg-primary text-white text-[10px] md:text-xs',
             !today && inMonth && dayOfWeek === 0 && 'text-rose-500',
             !today && inMonth && dayOfWeek === 6 && 'text-blue-500',
-            !today && inMonth && dayOfWeek !== 0 && dayOfWeek !== 6 && 'text-zinc-800'
+            !today && inMonth && dayOfWeek !== 0 && dayOfWeek !== 6 && 'text-foreground'
           )}
         >
           {format(day, 'd')}
@@ -249,7 +249,7 @@ function DayCell({
           />
         ))}
         {sorted.length > 4 && (
-          <span className="text-[9px] text-zinc-400 leading-none">+{sorted.length - 4}</span>
+          <span className="text-[9px] text-muted-foreground leading-none">+{sorted.length - 4}</span>
         )}
       </div>
 
@@ -273,7 +273,7 @@ function DayCell({
           </span>
         ))}
         {moreCountDesktop > 0 && (
-          <span className="text-[10px] text-zinc-400 px-1.5">+{moreCountDesktop}</span>
+          <span className="text-[10px] text-muted-foreground px-1.5">+{moreCountDesktop}</span>
         )}
       </div>
     </button>

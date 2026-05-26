@@ -110,7 +110,7 @@ export function ExamForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       {/* Title */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">
+        <label className="block text-sm font-medium text-foreground mb-1">
           <FileText className="inline h-3.5 w-3.5 mr-1 -mt-0.5" />
           시험 이름
         </label>
@@ -124,12 +124,12 @@ export function ExamForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
 
       {/* Kind */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">종류</label>
+        <label className="block text-sm font-medium text-foreground mb-2">종류</label>
         <div className="flex flex-wrap gap-1.5">
           {EXAM_KINDS.map(({ value, label }) => (
             <label key={value} className="cursor-pointer">
               <input type="radio" {...register('examKind')} value={value} className="peer sr-only" />
-              <span className="inline-block px-3 py-1 rounded-full text-xs border border-zinc-200 peer-checked:bg-rose-500 peer-checked:text-white peer-checked:border-rose-500">
+              <span className="inline-block px-3 py-1 rounded-full text-xs border border-border peer-checked:bg-rose-500 peer-checked:text-white peer-checked:border-rose-500">
                 {label}
               </span>
             </label>
@@ -139,12 +139,12 @@ export function ExamForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
 
       {/* Subject */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">과목</label>
+        <label className="block text-sm font-medium text-foreground mb-2">과목</label>
         <div className="flex flex-wrap gap-1.5">
           {SUBJECTS.map((s) => (
             <label key={s} className="cursor-pointer">
               <input type="radio" {...register('subject')} value={s} className="peer sr-only" />
-              <span className="inline-block px-3 py-1 rounded-full text-xs border border-zinc-200 peer-checked:bg-zinc-900 peer-checked:text-white peer-checked:border-zinc-900">
+              <span className="inline-block px-3 py-1 rounded-full text-xs border border-border peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary">
                 {s}
               </span>
             </label>
@@ -155,7 +155,7 @@ export function ExamForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
 
       {/* Exam date */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">시험일</label>
+        <label className="block text-sm font-medium text-foreground mb-1">시험일</label>
         <input
           type="date"
           {...register('examDate')}
@@ -166,7 +166,7 @@ export function ExamForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
 
       {/* Scope */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">시험 범위 (선택)</label>
+        <label className="block text-sm font-medium text-foreground mb-1">시험 범위 (선택)</label>
         <textarea
           {...register('scope')}
           rows={2}
@@ -177,11 +177,11 @@ export function ExamForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
 
       {/* Prep steps */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-2">준비 단계</label>
+        <label className="block text-sm font-medium text-foreground mb-2">준비 단계</label>
         <div className="space-y-2">
           {fields.map((field, idx) => (
             <div key={field.id} className="flex gap-2 items-center">
-              <span className="text-xs text-zinc-400 w-6 flex-shrink-0">{idx + 1}.</span>
+              <span className="text-xs text-muted-foreground w-6 flex-shrink-0">{idx + 1}.</span>
               <input
                 {...register(`prepSteps.${idx}.text`)}
                 placeholder="준비할 내용..."
@@ -196,7 +196,7 @@ export function ExamForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
               <button
                 type="button"
                 onClick={() => remove(idx)}
-                className="p-1.5 text-zinc-400 hover:text-red-500"
+                className="p-1.5 text-muted-foreground hover:text-red-500"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -218,7 +218,7 @@ export function ExamForm({ onSuccess, onCancel, entry, defaultDate }: Props) {
         <button
           type="button"
           onClick={onCancel}
-          className="flex-1 border border-zinc-300 rounded-lg py-2 text-sm font-medium hover:bg-zinc-50 transition-colors"
+          className="flex-1 border border-input rounded-lg py-2 text-sm font-medium hover:bg-muted transition-colors"
         >
           취소
         </button>

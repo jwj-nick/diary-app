@@ -42,13 +42,13 @@ export function WritePage() {
     return (
       <div className="max-w-xl mx-auto text-center py-16 space-y-3">
         <div className="text-5xl">👁</div>
-        <h1 className="text-base font-semibold text-zinc-800">조회 전용 모드</h1>
-        <p className="text-sm text-zinc-500">
+        <h1 className="text-base font-semibold text-foreground">조회 전용 모드</h1>
+        <p className="text-sm text-muted-foreground">
           다른 가족 시점으로 보는 중에는 항목을 작성/수정할 수 없습니다.
         </p>
         <button
           onClick={() => navigate(-1)}
-          className="mt-2 text-sm text-zinc-700 underline hover:text-zinc-900"
+          className="mt-2 text-sm text-foreground underline hover:text-foreground"
         >
           돌아가기
         </button>
@@ -59,8 +59,8 @@ export function WritePage() {
   if (editId && !editEntry) {
     return (
       <div className="max-w-xl mx-auto text-center py-16 space-y-3">
-        <p className="text-sm text-zinc-500">해당 항목을 찾을 수 없습니다.</p>
-        <button onClick={() => navigate('/')} className="text-sm text-zinc-700 underline">
+        <p className="text-sm text-muted-foreground">해당 항목을 찾을 수 없습니다.</p>
+        <button onClick={() => navigate('/')} className="text-sm text-foreground underline">
           홈으로
         </button>
       </div>
@@ -72,12 +72,12 @@ export function WritePage() {
 
   return (
     <div className="max-w-xl mx-auto">
-      <h1 className="text-lg font-semibold text-zinc-900 mb-4">
+      <h1 className="text-lg font-semibold text-foreground mb-4">
         {isEdit ? '항목 수정' : '새 항목 작성'}
       </h1>
 
       {!isEdit && (
-        <div className="flex gap-1 bg-zinc-100 p-1 rounded-xl mb-6 overflow-x-auto scrollbar-none">
+        <div className="flex gap-1 bg-muted p-1 rounded-xl mb-6 overflow-x-auto scrollbar-none">
           {TABS.map(({ id, label, emoji }) => (
             <button
               key={id}
@@ -85,8 +85,8 @@ export function WritePage() {
               className={cn(
                 'flex-shrink-0 flex items-center justify-center gap-1 py-2 px-3 rounded-lg text-sm font-medium transition-all',
                 activeTab === id
-                  ? 'bg-white shadow-sm text-zinc-900'
-                  : 'text-zinc-500 hover:text-zinc-700'
+                  ? 'bg-card shadow-sm text-foreground'
+                  : 'text-muted-foreground hover:text-foreground'
               )}
             >
               <span>{emoji}</span>
@@ -96,7 +96,7 @@ export function WritePage() {
         </div>
       )}
 
-      <div className="bg-white rounded-xl border border-zinc-200 p-5">
+      <div className="bg-card rounded-xl border border-border p-5">
         {activeTab === 'study' && (
           <StudyLogForm
             entry={editEntry?.type === 'study' ? editEntry : undefined}

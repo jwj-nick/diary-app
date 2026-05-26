@@ -79,11 +79,11 @@ export function ScheduleForm({ onSaved, entry, defaultDate }: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       {/* Title */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">제목 *</label>
+        <label className="block text-sm font-medium text-foreground mb-1">제목 *</label>
         <input
           {...register('title')}
           placeholder="일정 제목"
-          className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
         {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>}
       </div>
@@ -91,19 +91,19 @@ export function ScheduleForm({ onSaved, entry, defaultDate }: Props) {
       {/* Date */}
       <div className="grid grid-cols-2 gap-3">
         <div>
-          <label className="block text-sm font-medium text-zinc-700 mb-1">시작일 *</label>
+          <label className="block text-sm font-medium text-foreground mb-1">시작일 *</label>
           <input
             type="date"
             {...register('startDate')}
-            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div>
-          <label className="block text-sm font-medium text-zinc-700 mb-1">종료일</label>
+          <label className="block text-sm font-medium text-foreground mb-1">종료일</label>
           <input
             type="date"
             {...register('endDate')}
-            className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+            className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </div>
@@ -113,30 +113,30 @@ export function ScheduleForm({ onSaved, entry, defaultDate }: Props) {
         <button
           type="button"
           onClick={() => setValue('allDay', !allDay)}
-          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${allDay ? 'bg-sky-500' : 'bg-zinc-200'}`}
+          className={`relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${allDay ? 'bg-sky-500' : 'bg-muted'}`}
         >
-          <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-white shadow transition-transform ${allDay ? 'translate-x-5' : 'translate-x-0.5'}`} />
+          <span className={`inline-block h-3.5 w-3.5 transform rounded-full bg-card shadow transition-transform ${allDay ? 'translate-x-5' : 'translate-x-0.5'}`} />
         </button>
-        <span className="text-sm text-zinc-700">하루 종일</span>
+        <span className="text-sm text-foreground">하루 종일</span>
       </div>
 
       {/* Time (if not all day) */}
       {!allDay && (
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-1">시작 시간</label>
+            <label className="block text-sm font-medium text-foreground mb-1">시작 시간</label>
             <input
               type="time"
               {...register('startTime')}
-              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-zinc-700 mb-1">종료 시간</label>
+            <label className="block text-sm font-medium text-foreground mb-1">종료 시간</label>
             <input
               type="time"
               {...register('endTime')}
-              className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+              className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
         </div>
@@ -144,22 +144,22 @@ export function ScheduleForm({ onSaved, entry, defaultDate }: Props) {
 
       {/* Location */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">장소</label>
+        <label className="block text-sm font-medium text-foreground mb-1">장소</label>
         <input
           {...register('location')}
           placeholder="장소 (선택)"
-          className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900"
+          className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         />
       </div>
 
       {/* Note */}
       <div>
-        <label className="block text-sm font-medium text-zinc-700 mb-1">메모</label>
+        <label className="block text-sm font-medium text-foreground mb-1">메모</label>
         <textarea
           {...register('note')}
           placeholder="메모 (선택)"
           rows={3}
-          className="w-full px-3 py-2.5 rounded-xl border border-zinc-200 text-sm focus:outline-none focus:ring-2 focus:ring-zinc-900 resize-none"
+          className="w-full px-3 py-2.5 rounded-xl border border-border text-sm focus:outline-none focus:ring-2 focus:ring-ring resize-none"
         />
       </div>
 
